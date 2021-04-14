@@ -72,7 +72,6 @@ func (h *handler) render(c *gin.Context, name string, td *templateData) {
 
 func isAuthenticated(c *gin.Context) bool {
 	session := sessions.Default(c)
-	fmt.Println("Session id: ", session.Get("authenticatedUserID"))
 	if session.Get("authenticatedUserID") == nil {
 		return false
 	}

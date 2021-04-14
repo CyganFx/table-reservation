@@ -52,11 +52,11 @@ func (h *handler) Init() *gin.Engine {
 	router.Use(sessions.Sessions("mySessionStore", sessionStore),
 		gin.Logger(), gin.Recovery(), SecureHeaders())
 
+	router.GET("/", h.MainPage)
+
 	api := router.Group("/api")
 	{
 		h.initUserRoutes(api)
-
-		api.GET("/main", h.MainPage)
 	}
 
 	router.Static("/static/", "./ui/static")
