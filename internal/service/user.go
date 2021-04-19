@@ -1,7 +1,6 @@
 package service
 
 import (
-	"github.com/CyganFx/table-reservation/internal/delivery/http-v1"
 	"github.com/CyganFx/table-reservation/pkg/domain"
 	"github.com/CyganFx/table-reservation/pkg/validator/forms"
 )
@@ -17,14 +16,14 @@ type UserRepo interface {
 	Authenticate(email, password string) (int, error)
 }
 
-func NewUser(repo UserRepo) http_v1.UserService {
+func NewUser(repo UserRepo) *user {
 	return &user{repo: repo}
 }
 
 func (u *user) Save(form *forms.Form) (bool, error) {
 	form.Required("name", "email", "mobile", "password")
 	form.MatchesPattern("email", forms.EmailRX)
-	form.MinLength("password", 10)
+	form.MinLength("password", 5)
 	form.MaxLength("name", 50)
 	form.MaxLength("email", 100)
 

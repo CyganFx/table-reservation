@@ -165,10 +165,11 @@ img {
 div.flash {
     color: #FFFFFF;
     font-weight: bold;
-    background-color: #34495E;
+    background-color: var(--first-color-alt);
     padding: 18px;
     margin-bottom: 36px;
     text-align: center;
+    z-index: 99;
 }
 
 /*========== NAV ==========*/

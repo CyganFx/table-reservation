@@ -34,11 +34,11 @@ func (h *handler) initUserRoutes(api *gin.RouterGroup) {
 }
 
 func (h *handler) MainPage(c *gin.Context) {
-	h.render(c, "main.page.tmpl", &templateData{})
+	h.render(c, "main.page.html", &templateData{})
 }
 
 func (h *handler) SignUpPage(c *gin.Context) {
-	h.render(c, "signup.page.tmpl", &templateData{
+	h.render(c, "signup.page.html", &templateData{
 		Form: forms.New(nil),
 	})
 }
@@ -53,13 +53,13 @@ func (h *handler) SignUp(c *gin.Context) {
 
 	valid, err := h.userService.Save(form)
 	if valid != true {
-		h.render(c, "signup.page.tmpl", &templateData{Form: form})
+		h.render(c, "signup.page.html", &templateData{Form: form})
 		return
 	}
 	if err != nil {
 		if errors.Is(err, domain.ErrDuplicateEmail) {
 			form.Errors.Add("email", "Address is already in use")
-			h.render(c, "signup.page.tmpl", &templateData{Form: form})
+			h.render(c, "signup.page.html", &templateData{Form: form})
 		} else {
 			h.errors.ServerError(c, err)
 		}
@@ -74,7 +74,7 @@ func (h *handler) SignUp(c *gin.Context) {
 }
 
 func (h *handler) LoginPage(c *gin.Context) {
-	h.render(c, "login.page.tmpl", &templateData{Form: forms.New(nil)})
+	h.render(c, "login.page.html", &templateData{Form: forms.New(nil)})
 }
 
 func (h *handler) Login(c *gin.Context) {
@@ -89,7 +89,7 @@ func (h *handler) Login(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, domain.ErrInvalidCredentials) {
 			form.Errors.Add("generic", "Email or Password is incorrect")
-			h.render(c, "login.page.tmpl", &templateData{Form: form})
+			h.render(c, "login.page.html", &templateData{Form: form})
 		} else {
 			h.errors.ServerError(c, err)
 		}
@@ -108,7 +108,7 @@ func (h *handler) Login(c *gin.Context) {
 
 	path := session.Get("redirectPathAfterLogin").(string)
 	session.Delete("redirectPathAfterLogin")
-
+	session.Save()
 	http.Redirect(c.Writer, c.Request, path, http.StatusSeeOther)
 }
 
@@ -137,7 +137,7 @@ func (h *handler) ShowById(c *gin.Context) {
 		}
 	}
 
-	h.render(c, "test.page.tmpl", &templateData{User: user})
+	h.render(c, "test.page.html", &templateData{User: user})
 }
 
 //TODO(Duman)

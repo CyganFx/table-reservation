@@ -35,7 +35,7 @@ type templateData struct {
 }
 
 func NewHandler(userService UserService, errors Responser,
-	templateCache map[string]*template.Template) domain.UserHandler {
+	templateCache map[string]*template.Template) *handler {
 	return &handler{
 		userService:   userService,
 		errors:        errors,

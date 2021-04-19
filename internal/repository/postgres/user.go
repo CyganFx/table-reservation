@@ -3,7 +3,7 @@ package postgres
 import (
 	"context"
 	"errors"
-	"github.com/CyganFx/table-reservation/internal/service"
+	"fmt"
 	"github.com/CyganFx/table-reservation/pkg/domain"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -18,14 +18,14 @@ type user struct {
 	db *pgxpool.Pool
 }
 
-func NewUser(db *pgxpool.Pool) service.UserRepo {
+func NewUser(db *pgxpool.Pool) *user {
 	return &user{db: db}
 }
 
 func (u *user) Create(name, email, mobile, password string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
-		return err
+		return errors.New("failed to generate hashed password")
 	}
 	query := `INSERT INTO users (name, email, mobile, password, created)
 	VALUES($1, $2, $3, $4, $5)`
@@ -39,7 +39,7 @@ func (u *user) Create(name, email, mobile, password string) error {
 				return domain.ErrDuplicateEmail
 			}
 		}
-		return err
+		return fmt.Errorf("failed to insert user: %v", err)
 	}
 	return nil
 }
@@ -55,7 +55,7 @@ func (u *user) GetById(id int) (*domain.User, error) {
 		if err.Error() == "no rows in result set" {
 			return nil, domain.ErrNoRecord
 		} else {
-			return nil, err
+			return nil, fmt.Errorf("failed to make select statement: %v", err)
 		}
 	}
 
@@ -72,9 +72,8 @@ func (u *user) Update(user *domain.User) error {
 		if err.Error() == "no rows in result set" {
 			return domain.ErrInvalidCredentials
 		}
-		return err
+		return fmt.Errorf("failed to update: %v", err)
 	}
-
 	return nil
 }
 
@@ -85,12 +84,11 @@ func (u *user) Authenticate(email, password string) (int, error) {
 	query := "SELECT id, password FROM users WHERE email = $1"
 	row := u.db.QueryRow(context.Background(), query, email)
 	err := row.Scan(&id, &hashedPassword)
-
 	if err != nil {
 		if err.Error() == "no rows in result set" {
 			return -1, domain.ErrInvalidCredentials
 		}
-		return -1, err
+		return -1, fmt.Errorf("failed to scan: %v", err)
 	}
 
 	err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
@@ -98,9 +96,8 @@ func (u *user) Authenticate(email, password string) (int, error) {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 			return -1, domain.ErrInvalidCredentials
 		} else {
-			return -1, err
+			return -1, fmt.Errorf("failed to compare hash and password: %v", err)
 		}
 	}
-
 	return id, nil
 }

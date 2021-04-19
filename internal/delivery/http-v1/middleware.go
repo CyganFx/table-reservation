@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"time"
 )
 
@@ -13,22 +12,6 @@ func SecureHeaders() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("X-XSS-Protection", "1; mode=block")
 		c.Writer.Header().Set("X-Frame-Options", "deny")
-		c.Next()
-	}
-}
-
-func RequireAuthentication() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		if !isAuthenticated(c) {
-			session := sessions.Default(c)
-			session.Set("redirectPathAfterLogin", c.Request.URL.Path)
-			session.Save()
-
-			http.Redirect(c.Writer, c.Request, "/api/user/login", http.StatusSeeOther)
-			return
-		}
-
-		c.Writer.Header().Add("Cache-Control", "no-store")
 		c.Next()
 	}
 }
@@ -77,3 +60,19 @@ func isAuthenticated(c *gin.Context) bool {
 	}
 	return true
 }
+
+//func RequireAuthentication() gin.HandlerFunc {
+//	return func(c *gin.Context) {
+//		if !isAuthenticated(c) {
+//			session := sessions.Default(c)
+//			session.Set("redirectPathAfterLogin", c.Request.URL.Path)
+//			session.Save()
+//
+//			http.Redirect(c.Writer, c.Request, "/api/user/login", http.StatusSeeOther)
+//			return
+//		}
+//
+//		c.Writer.Header().Add("Cache-Control", "no-store")
+//		c.Next()
+//	}
+//}
