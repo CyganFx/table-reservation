@@ -167,9 +167,9 @@ div.flash {
     font-weight: bold;
     background-color: var(--first-color-alt);
     padding: 18px;
-    margin-bottom: 36px;
+    margin-top: 72px;
     text-align: center;
-    z-index: 99;
+    z-index: 999;
 }
 
 /*========== NAV ==========*/

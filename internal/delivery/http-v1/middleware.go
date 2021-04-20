@@ -3,6 +3,7 @@ package http_v1
 import (
 	"bytes"
 	"fmt"
+	"github.com/CyganFx/table-reservation/pkg/domain"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"time"
@@ -28,10 +29,16 @@ func addDefaultData(td *templateData, c *gin.Context) *templateData {
 	if session.Get("flash") != nil {
 		td.Flash = session.Get("flash").(string)
 		session.Delete("flash")
-		session.Save()
+	}
+
+	if session.Get("role") != nil {
+		td.User = domain.NewUser()
+		td.User.Role.ID = session.Get("role").(int)
 	}
 
 	td.IsAuthenticated = isAuthenticated(c)
+
+	session.Save()
 	return td
 }
 

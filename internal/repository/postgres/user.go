@@ -22,15 +22,11 @@ func NewUser(db *pgxpool.Pool) *user {
 	return &user{db: db}
 }
 
-func (u *user) Create(name, email, mobile, password string) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
-	if err != nil {
-		return errors.New("failed to generate hashed password")
-	}
-	query := `INSERT INTO users (name, email, mobile, password, created)
-	VALUES($1, $2, $3, $4, $5)`
+func (u *user) Create(name, email, mobile, hashedPassword string, roleId int) error {
+	query := `INSERT INTO users (name, role_id, email, mobile, password, created)
+	VALUES($1, $2, $3, $4, $5, $6)`
 
-	_, err = u.db.Exec(context.Background(), query, name, email, mobile, string(hashedPassword), time.Now())
+	_, err := u.db.Exec(context.Background(), query, name, roleId, email, mobile, hashedPassword, time.Now())
 	if err != nil {
 		postgresError := err.(*pgconn.PgError)
 		if errors.As(err, &postgresError) {
@@ -45,11 +41,12 @@ func (u *user) Create(name, email, mobile, password string) error {
 }
 
 func (u *user) GetById(id int) (*domain.User, error) {
-	query := `SELECT name, email, mobile, created FROM users WHERE id = $1`
-	user := &domain.User{}
+	query := `SELECT u.name, u.role_id, r.name, u.email, u.mobile, u.created
+			FROM users u join roles r on u.role_id = r.id WHERE u.id = $1`
+	user := domain.NewUser()
 
 	err := u.db.QueryRow(context.Background(), query, id).
-		Scan(&user.Name, &user.Email,
+		Scan(&user.Name, &user.Role.ID, &user.Role.Name, &user.Email,
 			&user.Mobile, &user.Created)
 	if err != nil {
 		if err.Error() == "no rows in result set" {

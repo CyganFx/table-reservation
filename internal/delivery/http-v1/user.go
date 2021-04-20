@@ -52,7 +52,7 @@ func (h *handler) SignUp(c *gin.Context) {
 	form := forms.New(c.Request.PostForm)
 
 	valid, err := h.userService.Save(form)
-	if valid != true {
+	if !valid {
 		h.render(c, "signup.page.html", &templateData{Form: form})
 		return
 	}
@@ -96,8 +96,14 @@ func (h *handler) Login(c *gin.Context) {
 		return
 	}
 
+	user, err := h.userService.FindById(id)
+	if err != nil {
+		h.errors.NotFound(c)
+	}
+
 	session := sessions.Default(c)
 	session.Set("authenticatedUserID", id)
+	session.Set("role", user.Role.ID)
 	session.Set("flash", "loginned successfully!")
 
 	if session.Get("redirectPathAfterLogin") == nil {

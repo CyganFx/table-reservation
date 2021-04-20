@@ -20,6 +20,18 @@ type User struct {
 	Mobile   string    `json:"mobile"`
 	Password []byte    `json:"password"`
 	Created  time.Time `json:"created"`
+	Role     *Role     `json:"role"`
+}
+
+func NewUser() *User {
+	return &User{
+		Role: &Role{},
+	}
+}
+
+type Role struct {
+	ID   int
+	Name string
 }
 
 type UserHandler interface {

@@ -27,7 +27,6 @@ type Responser interface {
 // Passing templateData in html pages at render
 type templateData struct {
 	User            *domain.User
-	Users           []*domain.User
 	Form            *forms.Form
 	CurrentYear     int
 	Flash           string
@@ -57,6 +56,8 @@ func (h *handler) Init() *gin.Engine {
 	api := router.Group("/api")
 	{
 		h.initUserRoutes(api)
+		h.initMenuRoutes(api)
+		h.initReservationRoutes(api)
 	}
 
 	router.Static("/static/", "./ui/static")

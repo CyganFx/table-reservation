@@ -1,16 +1,20 @@
 package service
 
 import (
+	"errors"
 	"github.com/CyganFx/table-reservation/pkg/domain"
 	"github.com/CyganFx/table-reservation/pkg/validator/forms"
+	"golang.org/x/crypto/bcrypt"
 )
+
+const UserRoleId = 2
 
 type user struct {
 	repo UserRepo
 }
 
 type UserRepo interface {
-	Create(name, email, mobile, password string) error
+	Create(name, email, mobile, hashedPassword string, roleId int) error
 	GetById(id int) (*domain.User, error)
 	Update(user *domain.User) error
 	Authenticate(email, password string) (int, error)
@@ -24,6 +28,8 @@ func (u *user) Save(form *forms.Form) (bool, error) {
 	form.Required("name", "email", "mobile", "password")
 	form.MatchesPattern("email", forms.EmailRX)
 	form.MinLength("password", 5)
+	form.MinLength("mobile", 11)
+	form.MaxLength("mobile", 12)
 	form.MaxLength("name", 50)
 	form.MaxLength("email", 100)
 
@@ -31,10 +37,17 @@ func (u *user) Save(form *forms.Form) (bool, error) {
 		return false, nil
 	}
 
-	err := u.repo.Create(form.Get("name"),
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(form.Get("password")), 12)
+	if err != nil {
+		return false, errors.New("failed to generate hashed password")
+	}
+
+	err = u.repo.Create(form.Get("name"),
 		form.Get("email"),
 		form.Get("mobile"),
-		form.Get("password"))
+		string(hashedPassword),
+		UserRoleId,
+	)
 	if err != nil {
 		return true, err
 	}
