@@ -2,23 +2,30 @@ package domain
 
 import "time"
 
-// TODO(Duman) Create tables in db
-
 type Table struct {
-	ID          int
-	Capacity    int
-	IsAvailable bool
-	Location    string
-	Reservation ReservationSchema
+	ID       int
+	Capacity int
+	Location string
 }
 
-type ReservationSchema struct {
-	Name   string
-	Mobile string
-	Email  string
+type Reservation struct {
+	ID           int
+	Table        *Table
+	CustName     string
+	CustMobile   string
+	CustEmail    string
+	Event        string
+	NumOfPersons int
+	Date         time.Time
+}
+
+func NewReservation() *Reservation {
+	return &Reservation{
+		Table: &Table{},
+	}
 }
 
 type DaySchema struct {
 	Date   time.Time
-	Tables []Table
+	Tables []*Table
 }

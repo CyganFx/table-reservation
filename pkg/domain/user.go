@@ -12,7 +12,6 @@ var (
 	ErrDuplicateEmail     = errors.New("domain: duplicate email")
 )
 
-// more fields will be added later
 type User struct {
 	ID       int       `json:"id"`
 	Name     string    `json:"username"`
