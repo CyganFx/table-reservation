@@ -3,4 +3,5 @@
 .idea/
 .idea/workspace.xml
 **/.idea/workspace.xml
-.env
+tasty-food-cafe/.env
+ez-booking/.env
