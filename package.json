@@ -1,0 +1,26 @@
+{
+  "name": "table-reservation",
+  "version": "1.0.0",
+  "description": "Create .env file in root directory and add following values:\r ```dotenv\r POSTGRES_URI=postgres://<username>:<password>@127.0.0.1:5432/<db_name>\r SESSION_SECRET=<any secret>\r ```",
+  "main": "postcss.config.js",
+  "dependencies": {
+    "autoprefixer": "^10.2.5",
+    "postcss": "^8.2.12",
+    "tailwindcss": "^2.1.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CyganFx/table-reservation.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CyganFx/table-reservation/issues"
+  },
+  "homepage": "https://github.com/CyganFx/table-reservation#readme"
+}
