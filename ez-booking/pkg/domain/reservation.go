@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"github.com/gin-gonic/gin"
+	"time"
+)
 
 type Table struct {
 	ID       int
@@ -19,6 +22,11 @@ type Reservation struct {
 	Date         time.Time
 }
 
+type Location struct {
+	ID   int
+	Name string
+}
+
 func NewReservation() *Reservation {
 	return &Reservation{
 		Table: &Table{},
@@ -28,4 +36,8 @@ func NewReservation() *Reservation {
 type DaySchema struct {
 	Date   time.Time
 	Tables []*Table
+}
+
+type ReservationHandler interface {
+	GetAvailableTables(c *gin.Context)
 }

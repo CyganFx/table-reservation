@@ -2,6 +2,7 @@ package http_v1
 
 import (
 	"errors"
+	"fmt"
 	"github.com/CyganFx/table-reservation/ez-booking/pkg/domain"
 	"github.com/CyganFx/table-reservation/ez-booking/pkg/validator/forms"
 	"github.com/gin-contrib/sessions"
@@ -82,6 +83,8 @@ func (h *handler) Login(c *gin.Context) {
 		h.errors.ClientError(c, http.StatusBadRequest)
 		return
 	}
+
+	fmt.Println(c.Request.FormValue("date"))
 
 	form := forms.New(c.Request.PostForm)
 

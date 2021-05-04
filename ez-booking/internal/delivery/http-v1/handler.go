@@ -11,9 +11,10 @@ import (
 )
 
 type handler struct {
-	userService   UserService
-	errors        Responser
-	templateCache map[string]*template.Template
+	userService        UserService
+	reservationService ReservationService
+	errors             Responser
+	templateCache      map[string]*template.Template
 }
 
 // handler uses Responser interface to handle errors
@@ -27,18 +28,20 @@ type Responser interface {
 // Passing templateData in html pages at render
 type templateData struct {
 	User            *domain.User
+	ReservationData *ReservationData
 	Form            *forms.Form
 	CurrentYear     int
 	Flash           string
 	IsAuthenticated bool
 }
 
-func NewHandler(userService UserService, errors Responser,
+func NewHandler(userService UserService, reservationService ReservationService, errors Responser,
 	templateCache map[string]*template.Template) *handler {
 	return &handler{
-		userService:   userService,
-		errors:        errors,
-		templateCache: templateCache,
+		userService:        userService,
+		reservationService: reservationService,
+		errors:             errors,
+		templateCache:      templateCache,
 	}
 }
 
@@ -56,8 +59,8 @@ func (h *handler) Init() *gin.Engine {
 	api := router.Group("/api")
 	{
 		h.initUserRoutes(api)
-		h.initMenuRoutes(api)
 		h.initReservationRoutes(api)
+		h.initMenuRoutes(api)
 	}
 
 	router.Static("/static/", "./ui/static")

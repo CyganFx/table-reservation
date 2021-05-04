@@ -1,6 +1,6 @@
-#Table reservation app
+# Table reservation app
 
-##Prerequisites
+## Prerequisites
 
 Create .env file in root directory and add following values:
 ```dotenv

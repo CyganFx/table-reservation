@@ -46,14 +46,16 @@ func Run(port string) {
 	}
 
 	userRepo := postgres.NewUser(dbPool)
+	reservationRepo := postgres.NewReservation(dbPool)
 	userService := service.NewUser(userRepo)
+	reservationService := service.NewReservation(reservationRepo)
 	restErrorsResponser := rest_errors.NewHttpResponser(errorLog)
-	userHandler := http_v1.NewHandler(userService, restErrorsResponser, templateCache)
+	handler := http_v1.NewHandler(userService, reservationService, restErrorsResponser, templateCache)
 
 	srv := &http.Server{
 		Addr:         *addr,
 		ErrorLog:     errorLog,
-		Handler:      userHandler.Init(),
+		Handler:      handler.Init(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,

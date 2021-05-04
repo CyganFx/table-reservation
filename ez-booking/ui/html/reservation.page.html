@@ -2,6 +2,45 @@
 {{define "title"}} Reservation {{end}}
 {{define "content"}}
 
-    Reservation Page
+    <br><br><br><br><br>
 
+    <h1>Reservation Page</h1>
+
+    {{with .ReservationData}}
+
+        <form method="POST" action="#">
+            <div>
+                <label>Date</label>
+                <input type="date" name="date" min="{{.CurrentDate}}" max="{{.MaxBookingDate}}">
+            </div>
+            <div>
+                <label>Time</label>
+                <select name="bookTime">
+                    {{range .TimeSelector}}
+                        <option value="{{.}}">{{.}}</option>
+                    {{end}}
+                </select>
+            </div>
+            <div>
+                <label>Location</label>
+                <select name="location_id">
+                    {{range .LocationSelector}}
+                        <option value="{{.ID}}">{{.Name}}</option>
+                    {{end}}
+                </select>
+            </div>
+            <div>
+                <label>Party Size</label>
+                <select name="party_size">
+                    {{range .PartySizeSelector}}
+                        <option value="{{.}}">{{.}}</option>
+                    {{end}}
+                </select>
+            </div>
+        </form>
+    {{end}}
+
+    <h1>Here will be tables:</h1>
+
+    <br><br>
 {{end}}

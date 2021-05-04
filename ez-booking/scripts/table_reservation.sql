@@ -45,6 +45,7 @@ values ('default'),
        ('outside'),
        ('bar');
 
+
 create table cafes
 (
     id   serial       not null primary key,
@@ -54,7 +55,6 @@ create table cafes
 insert into cafes (name)
 values ('tasty_food'),
        ('random_cafe');
-
 
 create table tables
 (
@@ -67,6 +67,12 @@ create table tables
         foreign key (location_id)
             references locations (id)
 );
+
+alter table tables
+    add constraint tables_fk_cafe_id
+        foreign key (cafe_id)
+            references cafes (id);
+
 
 insert into tables (id, cafe_id, capacity, location_id)
 values (1, 1, 2, 4),
@@ -85,7 +91,6 @@ values (1, 1, 2, 4),
        (14, 1, 4, 1),
        (15, 1, 4, 1);
 
-
 create table events
 (
     id   serial       not null primary key,
@@ -96,7 +101,6 @@ insert into events (name)
 values ('default'),
        ('romantic dinner'),
        ('birthday');
-
 
 create table reservations
 (
@@ -109,13 +113,25 @@ create table reservations
     event_id       int          not null default 1,
     num_of_persons int          not null,
     date           timestamp    not null,
-    CONSTRAINT fk_table_id
+    CONSTRAINT reservations_fk_cafe_id_table_id
         FOREIGN KEY (cafe_id, table_id)
             REFERENCES tables (cafe_id, id),
     constraint fk_event_id
         foreign key (event_id)
-            references events (id),
-    constraint fk_cafe_id
-        foreign key (cafe_id)
-            references cafes (id)
+            references events (id)
 );
+
+create table cafes_events
+(
+    cafe_id  int not null,
+    event_id int not null,
+    constraint cafes_events_fk_cafe_id foreign key (cafe_id) references cafes (id),
+    constraint cafes_events_fk_event_id foreign key (event_id) references events (id),
+    CONSTRAINT ck_cafe_id_event_id primary key (cafe_id, event_id)
+);
+
+insert into cafes_events (cafe_id, event_id)
+VALUES (1, 1),
+       (1, 2),
+       (1, 3);
+
