@@ -6,9 +6,12 @@
 
     <h1>Reservation Page</h1>
 
-    {{with .ReservationData}}
 
-        <form method="POST" action="#">
+    <form method="POST" action="/api/reservation/tables">
+        {{with .ReservationData}}
+            <div>
+                <input type="hidden" name="cafe_id" value="{{.CafeID}}">
+            </div>
             <div>
                 <label>Date</label>
                 <input type="date" name="date" min="{{.CurrentDate}}" max="{{.MaxBookingDate}}">
@@ -37,10 +40,25 @@
                     {{end}}
                 </select>
             </div>
-        </form>
-    {{end}}
+            <input type="submit" value="Show Tables">
+        {{end}}
+    </form>
+
 
     <h1>Here will be tables:</h1>
-
+    <form method="POST" action="#">
+        {{with .ReservationData}}
+            {{range .Tables}}
+                <div>
+                    <label>Table_ID #{{.ID}} Location_ID #{{.LocationID}} Capacity {{.Capacity}}</label>
+                    <input type="radio" name="table_id" value="{{.ID}}">
+{{/*                    {{range := .Capacity}}*/}}
+{{/*                        <span>Some image of chair {{$i}}: {{$sequence}}</span>*/}}
+{{/*                    {{end}}*/}}
+                </div>
+            {{end}}
+            <input type="submit" value="Choose Table">
+        {{end}}
+    </form>
     <br><br>
 {{end}}

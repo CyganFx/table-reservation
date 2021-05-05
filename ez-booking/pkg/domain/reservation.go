@@ -6,9 +6,9 @@ import (
 )
 
 type Table struct {
-	ID       int
-	Capacity int
-	Location string
+	ID         int
+	Capacity   int
+	LocationID int
 }
 
 type Reservation struct {

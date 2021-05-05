@@ -27,19 +27,22 @@ func (h *handler) initReservationRoutes(api *gin.RouterGroup) {
 }
 
 type ReservationService interface {
-	GetAvailableTables(cafeID, capacity, locationID int, date, bookTime string) ([]*domain.Table, error)
+	GetAvailableTables(cafeID, partySize, locationID int, date, bookTime string) ([]*domain.Table, error)
 	GetLocationsByCafeID(cafeID int) ([]*domain.Location, error)
 }
 
 type ReservationData struct {
+	CafeID            int
 	CurrentDate       string
 	MaxBookingDate    string
 	TimeSelector      []string
-	LocationSelector  []*domain.Location
 	PartySizeSelector []int
+	LocationSelector  []*domain.Location
+	Tables            []*domain.Table
 }
 
 func (h *handler) setReservationData(data *ReservationData, cafeID int) error {
+	data.CafeID = cafeID
 	data.CurrentDate = time.Now().Format("2006-01-02")
 	data.MaxBookingDate =
 		time.Now().AddDate(0, 0, maxDaysToBookInAdvance).Format("2006-01-02")
@@ -78,9 +81,9 @@ func setTimeSelector(data *ReservationData) {
 }
 
 func setPartySizeSelector(data *ReservationData) {
-	for capacity := 1; capacity < maxTableCapacity; capacity++ {
+	for partySize := 1; partySize <= maxTableCapacity; partySize++ {
 		data.PartySizeSelector = append(data.PartySizeSelector,
-			capacity)
+			partySize)
 	}
 }
 
@@ -106,19 +109,14 @@ func (h *handler) ReservationPage(c *gin.Context) {
 		h.errors.ServerError(c, err)
 	}
 
-	fmt.Println(reservationData.CurrentDate)
-	fmt.Println(reservationData.MaxBookingDate)
-	fmt.Println(reservationData.PartySizeSelector)
-	fmt.Println(reservationData.LocationSelector)
-	fmt.Println(reservationData.TimeSelector)
-
 	h.render(c, "reservation.page.html", &templateData{
 		ReservationData: reservationData,
 	})
 }
 
 func (h *handler) GetAvailableTables(c *gin.Context) {
-	if err := c.Request.ParseForm(); err != nil {
+	err := c.Request.ParseForm()
+	if err != nil {
 		h.errors.ClientError(c, http.StatusBadRequest)
 		return
 	}
@@ -127,9 +125,21 @@ func (h *handler) GetAvailableTables(c *gin.Context) {
 	date := c.Request.FormValue("date")
 	bookTime := c.Request.FormValue("bookTime")
 	locationID, _ := strconv.Atoi(c.Request.FormValue("location_id"))
-	capacity, _ := strconv.Atoi(c.Request.FormValue("party_size"))
+	partySize, _ := strconv.Atoi(c.Request.FormValue("party_size"))
 
-	_, _ = h.reservationService.GetAvailableTables(cafeID, capacity, locationID, date, bookTime)
+	reservationData := &ReservationData{}
 
-	panic("implement me")
+	reservationData.Tables, err = h.reservationService.GetAvailableTables(cafeID, partySize, locationID, date, bookTime)
+	if err != nil {
+		h.errors.ServerError(c, err)
+	}
+
+	err = h.setReservationData(reservationData, cafeID)
+	if err != nil {
+		h.errors.ServerError(c, err)
+	}
+
+	h.render(c, "reservation.page.html", &templateData{
+		ReservationData: reservationData,
+	})
 }
