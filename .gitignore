@@ -3,5 +3,8 @@
 .idea/
 .idea/workspace.xml
 **/.idea/workspace.xml
+<<<<<<< HEAD
 .env
 /node_modules
+ez-booking/.env
+>>>>>>> f8e8db02037ef7576a18f844751dd17ad735d2c3

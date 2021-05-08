@@ -8,7 +8,6 @@
     "postcss": "^8.2.12",
     "tailwindcss": "^2.1.2"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
