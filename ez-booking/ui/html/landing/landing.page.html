@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../../static/css/compiled.css" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <!--Sunflower Font-->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sunflower:wght@500&display=swap"
+      rel="stylesheet"
+    />
+    <!--Montserrat Alternates Font-->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@500&display=swap"
+      rel="stylesheet"
+    />
+    <!--Montserrat Font-->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .monts {
+        font-family: "Montserrat", sans-serif;
+      }
+      .sunflower {
+        font-family: "Sunflower", sans-serif;
+      }
+      .montsA {
+        font-family: "Montserrat Alternates", sans-serif;
+      }
+      .common-gradient {
+        background: -webkit-linear-gradient(45deg, #39c223, #0038ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        text-indent: 1px;
+        text-overflow: "";
+      }
+      .search-field__background {
+        background-image: url(../../static/img/updatedh.jpg);
+        background-position: 100%;
+        background-repeat: no-repeat;
+        background-size: cover;
+        height: 26rem;
+        opacity: 1;
+      }
+      /* input[type="date"]::-webkit-inner-spin-button,
+      input[type="date"]::-webkit-calendar-picker-indicator {
+        display: none;
+        -webkit-appearance: none;
+      } */
+    </style>
+    <title>Check, Please</title>
+  </head>
+  <body class="min-h-screen bg-white">
+    <header class="bg-white">
+      <div class="container mx-auto">
+        <div class="py-10 px-16 flex justify-between items-center h-12">
+          <div class="logo sunflower text-2xl font-medium common-gradient">
+            <a href="#" class="block">Check, Please</a>
+          </div>
+          <div class="navigation montsA flex space-x-5 text-lg items-center">
+            <div><a href="#">Home</a></div>
+            <div><a href="#">About Us</a></div>
+            <div><a href="#">Join Us</a></div>
+            <div>
+              <a
+                class="p-2.5 rounded text-white"
+                style="background-color: #36a448"
+                href="#"
+                >Sign In</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div
+      class="flex flex-col space-y-3 justify-center items-center bg-contain bg-no-repeat search-field__background"
+    >
+      <div class="text-4xl text-white font-medium monts">
+        Find your table for any occasion
+      </div>
+      <div class="search-field flex space-x-5">
+        <div
+          class="bg-white rounded-sm flex items-center monts text-xs font-medium"
+        >
+          <div
+            class="relative flex px-2 py-1.5 datepicker-toggle border-r-2 border-gray-300"
+          >
+            <div class="flex justify-center items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+            <div class="monts text-xs flex justify-center items-center pl-1.5">
+              <input
+                type="date"
+                id="clientDate"
+                onchange="timeChangeHandler(event)"
+              />
+            </div>
+            <div class="flex justify-center items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </div>
+          </div>
+          <div
+            class="flex justify-center items-center relative px-2 py-1.5 border-r-2"
+          >
+            <div class="flex justify-center items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div class="monts text-xs flex justify-center items-center pl-1.5">
+              <select name="" id="time_manager" required></select>
+            </div>
+            <div class="flex justify-center items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </div>
+          </div>
+          <div class="relative px-2 py-1.5">
+            <div></div>
+            <div class="monts text-xs">March 8, 2021</div>
+            <div></div>
+          </div>
+        </div>
+        <div class="relative">
+          <div
+            class="absolute top-0 left-0 h-full w-8 flex justify-center items-center"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </div>
+          <input
+            type="text"
+            class="h-8 w-56 py-2 font-medium text-xs pr-9 pl-8 rounded-sm placeholder-gray-400 focus:outline-none"
+            placeholder="Restaurant, Features, or other"
+          />
+        </div>
+        <div
+          class="max-h-8 rounded-sm text-sm flex justify-center items-center"
+          style="background-color: #36a448"
+        >
+          <a class="monts font-medium px-1.5 text-white" href="#">Find Table</a>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script src="./js/optionCreator.js"></script>
+</html>
