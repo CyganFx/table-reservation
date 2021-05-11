@@ -41,6 +41,32 @@ func (r *reservation) GetAvailableLocationsByCafeID(cafeID int) ([]*domain.Locat
 	return ll, nil
 }
 
+func (r *reservation) GetAvailableEventsByCafeID(cafeID int) ([]*domain.Event, error) {
+	query := `SELECT DISTINCT e.id, e.name FROM events e
+				JOIN cafes_events ce on e.id = ce.event_id WHERE ce.cafe_id = $1`
+	rows, err := r.db.Query(context.Background(), query, cafeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ee []*domain.Event
+
+	for rows.Next() {
+		e := &domain.Event{}
+		err = rows.Scan(&e.ID, &e.Name)
+		if err != nil {
+			return nil, fmt.Errorf("failed to assign values to event struct from row %v", err)
+		}
+		ee = append(ee, e)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return ee, nil
+}
+
 func (r *reservation) GetSuitableTables(cafeID, partySize, locationID int, date, minPossibleBookingTime, maxPossibleBookingTime string) ([]*domain.Table, error) {
 	query := `	select id, capacity, location_id
 				from tables
@@ -75,4 +101,19 @@ func (r *reservation) GetSuitableTables(cafeID, partySize, locationID int, date,
 	}
 
 	return tt, nil
+}
+
+func (r *reservation) BookTable(reservation *domain.Reservation) error {
+	query := `INSERT INTO reservations(cafe_id, table_id, event_id, event_description,
+				cust_name, cust_mobile, cust_email, num_of_persons, date)
+				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id;`
+	err := r.db.QueryRow(context.Background(), query, reservation.Cafe.ID, reservation.Table.ID, reservation.Event.ID,
+		reservation.EventDescription, reservation.CustName, reservation.CustMobile,
+		reservation.CustEmail, reservation.PartySize, reservation.Date).
+		Scan(&reservation.ID)
+	if err != nil {
+		return fmt.Errorf("failed to book table: %v", err)
+	}
+
+	return nil
 }

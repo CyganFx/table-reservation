@@ -25,7 +25,6 @@ func NewUser(db *pgxpool.Pool) *user {
 func (u *user) Create(name, email, mobile, hashedPassword string, roleId int) error {
 	query := `INSERT INTO users (name, role_id, email, mobile, password, created)
 	VALUES($1, $2, $3, $4, $5, $6)`
-
 	_, err := u.db.Exec(context.Background(), query, name, roleId, email, mobile, hashedPassword, time.Now())
 	if err != nil {
 		postgresError := err.(*pgconn.PgError)

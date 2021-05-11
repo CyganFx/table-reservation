@@ -24,7 +24,7 @@ func NewUser(repo UserRepo) *user {
 	return &user{repo: repo}
 }
 
-func (u *user) Save(form *forms.Form) (bool, error) {
+func (u *user) Save(form *forms.FormValidator) (bool, error) {
 	form.Required("name", "email", "mobile", "password")
 	form.MatchesPattern("email", forms.EmailRX)
 	form.MinLength("password", 5)

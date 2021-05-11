@@ -12,7 +12,7 @@ import (
 )
 
 type UserService interface {
-	Save(form *forms.Form) (bool, error)
+	Save(form *forms.FormValidator) (bool, error)
 	SignIn(email, password string) (int, error)
 	FindById(id int) (*domain.User, error)
 	Update(user *domain.User) error
@@ -39,9 +39,7 @@ func (h *handler) MainPage(c *gin.Context) {
 }
 
 func (h *handler) SignUpPage(c *gin.Context) {
-	h.render(c, "signup.page.html", &templateData{
-		Form: forms.New(nil),
-	})
+	h.render(c, "signup.page.html", &templateData{Form: forms.New(nil)})
 }
 
 func (h *handler) SignUp(c *gin.Context) {
@@ -102,6 +100,7 @@ func (h *handler) Login(c *gin.Context) {
 	user, err := h.userService.FindById(id)
 	if err != nil {
 		h.errors.NotFound(c)
+		return
 	}
 
 	session := sessions.Default(c)

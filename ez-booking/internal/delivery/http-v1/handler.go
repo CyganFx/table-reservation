@@ -29,7 +29,7 @@ type Responser interface {
 type templateData struct {
 	User            *domain.User
 	ReservationData *ReservationData
-	Form            *forms.Form
+	Form            *forms.FormValidator
 	CurrentYear     int
 	Flash           string
 	IsAuthenticated bool

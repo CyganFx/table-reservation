@@ -10,19 +10,19 @@ import (
 
 var EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
-type Form struct {
+type FormValidator struct {
 	url.Values
 	Errors errors
 }
 
-func New(data url.Values) *Form {
-	return &Form{
+func New(data url.Values) *FormValidator {
+	return &FormValidator{
 		data,
 		map[string][]string{},
 	}
 }
 
-func (f *Form) Required(fields ...string) {
+func (f *FormValidator) Required(fields ...string) {
 	for _, field := range fields {
 		value := f.Get(field)
 		if strings.TrimSpace(value) == "" {
@@ -31,7 +31,7 @@ func (f *Form) Required(fields ...string) {
 	}
 }
 
-func (f *Form) MinLength(field string, d int) {
+func (f *FormValidator) MinLength(field string, d int) {
 	value := f.Get(field)
 	if value == "" {
 		return
@@ -41,7 +41,7 @@ func (f *Form) MinLength(field string, d int) {
 	}
 }
 
-func (f *Form) MatchesPattern(field string, pattern *regexp.Regexp) {
+func (f *FormValidator) MatchesPattern(field string, pattern *regexp.Regexp) {
 	value := f.Get(field)
 	if value == "" {
 		return
@@ -51,7 +51,7 @@ func (f *Form) MatchesPattern(field string, pattern *regexp.Regexp) {
 	}
 }
 
-func (f *Form) MaxLength(field string, d int) {
+func (f *FormValidator) MaxLength(field string, d int) {
 	value := f.Get(field)
 	if value == "" {
 		return
@@ -61,7 +61,7 @@ func (f *Form) MaxLength(field string, d int) {
 	}
 }
 
-func (f *Form) PermittedValues(field string, opts ...string) {
+func (f *FormValidator) PermittedValues(field string, opts ...string) {
 	value := f.Get(field)
 	if value == "" {
 		return
@@ -74,6 +74,6 @@ func (f *Form) PermittedValues(field string, opts ...string) {
 	f.Errors.Add(field, "This field is invalid")
 }
 
-func (f *Form) Valid() bool {
+func (f *FormValidator) Valid() bool {
 	return len(f.Errors) == 0
 }

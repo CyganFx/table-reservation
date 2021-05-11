@@ -1,8 +1,11 @@
 package http_v1
 
 import (
+	"encoding/gob"
 	"fmt"
 	"github.com/CyganFx/table-reservation/ez-booking/pkg/domain"
+	"github.com/CyganFx/table-reservation/ez-booking/pkg/validator/forms"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -21,14 +24,19 @@ const (
 func (h *handler) initReservationRoutes(api *gin.RouterGroup) {
 	reservation := api.Group("/reservation")
 	{
-		reservation.POST("/tables", h.GetAvailableTables)
 		reservation.GET("/cafe/:id", h.ReservationPage)
+		reservation.POST("/tables", h.GetAvailableTables)
+		reservation.POST("/confirm", h.Confirm)
+		reservation.POST("/submit", h.BookTable)
 	}
+	gob.Register(UserChoice{}) // in order to put struct in session
 }
 
 type ReservationService interface {
 	GetAvailableTables(cafeID, partySize, locationID int, date, bookTime string) ([]*domain.Table, error)
 	GetLocationsByCafeID(cafeID int) ([]*domain.Location, error)
+	GetEventsByCafeID(cafeID int) ([]*domain.Event, error)
+	BookTable(form *forms.FormValidator, userChoice UserChoice) (int, *forms.FormValidator, error)
 }
 
 type ReservationData struct {
@@ -38,7 +46,19 @@ type ReservationData struct {
 	TimeSelector      []string
 	PartySizeSelector []int
 	LocationSelector  []*domain.Location
+	EventSelector     []*domain.Event
 	Tables            []*domain.Table
+	UserChoice        UserChoice
+}
+
+type UserChoice struct {
+	CafeID           int
+	TableID          int
+	EventID          int
+	EventDescription string
+	PartySize        int
+	Date             string
+	BookTime         string
 }
 
 func (h *handler) setReservationData(data *ReservationData, cafeID int) error {
@@ -50,6 +70,10 @@ func (h *handler) setReservationData(data *ReservationData, cafeID int) error {
 	setTimeSelector(data)
 	setPartySizeSelector(data)
 	err := setLocationSelector(h, data, cafeID)
+	if err != nil {
+		return err
+	}
+	err = setEventSelector(h, data, cafeID)
 	if err != nil {
 		return err
 	}
@@ -96,6 +120,15 @@ func setLocationSelector(h *handler, data *ReservationData, cafeID int) error {
 	return nil
 }
 
+func setEventSelector(h *handler, data *ReservationData, cafeID int) error {
+	var err error
+	data.EventSelector, err = h.reservationService.GetEventsByCafeID(cafeID)
+	if err != nil {
+		return fmt.Errorf("trouble getting events %v", err)
+	}
+	return nil
+}
+
 func (h *handler) ReservationPage(c *gin.Context) {
 	cafeID, err := strconv.Atoi(c.Param("id"))
 	if err != nil || cafeID < 1 {
@@ -107,6 +140,7 @@ func (h *handler) ReservationPage(c *gin.Context) {
 	err = h.setReservationData(reservationData, cafeID)
 	if err != nil {
 		h.errors.ServerError(c, err)
+		return
 	}
 
 	h.render(c, "reservation.page.html", &templateData{
@@ -127,19 +161,96 @@ func (h *handler) GetAvailableTables(c *gin.Context) {
 	locationID, _ := strconv.Atoi(c.Request.FormValue("location_id"))
 	partySize, _ := strconv.Atoi(c.Request.FormValue("party_size"))
 
+	userChoice := &UserChoice{
+		CafeID:    cafeID,
+		PartySize: partySize,
+		Date:      date,
+		BookTime:  bookTime,
+	}
+
+	session := sessions.Default(c)
+	session.Set("userChoice", userChoice)
+	session.Save()
+
 	reservationData := &ReservationData{}
 
 	reservationData.Tables, err = h.reservationService.GetAvailableTables(cafeID, partySize, locationID, date, bookTime)
 	if err != nil {
 		h.errors.ServerError(c, err)
+		return
+	}
+
+	for _, t := range reservationData.Tables {
+		tempCapacityForHTML := make([]int, t.Capacity)
+		t.CapacityForHTML = tempCapacityForHTML
 	}
 
 	err = h.setReservationData(reservationData, cafeID)
 	if err != nil {
 		h.errors.ServerError(c, err)
+		return
 	}
 
 	h.render(c, "reservation.page.html", &templateData{
 		ReservationData: reservationData,
 	})
+}
+
+func (h *handler) Confirm(c *gin.Context) {
+	if err := c.Request.ParseForm(); err != nil {
+		h.errors.ClientError(c, http.StatusBadRequest)
+		return
+	}
+
+	tableID, _ := strconv.Atoi(c.Request.FormValue("table_id"))
+	eventID, _ := strconv.Atoi(c.Request.FormValue("event_id"))
+	eventDescription := c.Request.FormValue("event_description")
+
+	session := sessions.Default(c)
+	userChoice := session.Get("userChoice").(UserChoice)
+	userChoice.TableID = tableID
+	userChoice.EventID = eventID
+	userChoice.EventDescription = eventDescription
+	session.Set("userChoice", userChoice)
+	session.Save()
+
+	reservationData := &ReservationData{}
+	reservationData.UserChoice = userChoice
+
+	h.render(c, "confirm.page.html", &templateData{
+		ReservationData: reservationData,
+		Form:            forms.New(nil),
+	})
+}
+
+func (h *handler) BookTable(c *gin.Context) {
+	if err := c.Request.ParseForm(); err != nil {
+		h.errors.ClientError(c, http.StatusBadRequest)
+		return
+	}
+
+	session := sessions.Default(c)
+	userChoice := session.Get("userChoice").(UserChoice)
+	reservationData := &ReservationData{}
+	reservationData.UserChoice = userChoice
+
+	form := forms.New(c.Request.PostForm)
+
+	reservationID, formValidator, err := h.reservationService.BookTable(form, userChoice)
+	if formValidator != nil {
+		h.render(c, "confirm.page.html", &templateData{
+			ReservationData: reservationData,
+			Form:            form,
+		})
+		return
+	} else if err != nil {
+		h.errors.ServerError(c, err)
+		return
+	}
+
+	session.Set("reservationID", reservationID)
+	session.Set("flash", "Booked successfully! You will get notifications as your time comes")
+	session.Save()
+
+	h.MainPage(c)
 }
