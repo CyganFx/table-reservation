@@ -102,17 +102,19 @@ values ('default'),
        ('romantic dinner'),
        ('birthday');
 
+
 create table reservations
 (
-    id             serial       not null primary key,
-    cafe_id        int          not null,
-    table_id       int          not null,
-    cust_name      varchar(255) not null,
-    cust_mobile    varchar(255) not null,
-    cust_email     varchar(255) not null,
-    event_id       int          not null default 1,
-    num_of_persons int          not null,
-    date           timestamp    not null,
+    id                serial       not null primary key,
+    cafe_id           int          not null,
+    table_id          int          not null,
+    cust_name         varchar(255) not null,
+    cust_mobile       varchar(255) not null,
+    cust_email        varchar(255) not null,
+    event_id          int          not null default 1,
+    event_description text,
+    num_of_persons    int          not null,
+    date              timestamp    not null,
     CONSTRAINT reservations_fk_cafe_id_table_id
         FOREIGN KEY (cafe_id, table_id)
             REFERENCES tables (cafe_id, id),
