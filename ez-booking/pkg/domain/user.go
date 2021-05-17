@@ -17,6 +17,7 @@ type User struct {
 	Name     string    `json:"username"`
 	Email    string    `json:"email"`
 	Mobile   string    `json:"mobile"`
+	ImageURL string    `json:"imageURL"`
 	Password []byte    `json:"password"`
 	Created  time.Time `json:"created"`
 	Role     *Role     `json:"role"`
@@ -36,7 +37,9 @@ type Role struct {
 type UserHandler interface {
 	SignUp(c *gin.Context)
 	Login(c *gin.Context)
-	ShowById(c *gin.Context)
+	Logout(c *gin.Context)
+	ProfilePage(c *gin.Context)
+	UpdateImage(c *gin.Context)
 	Update(c *gin.Context)
 	Init() *gin.Engine
 }

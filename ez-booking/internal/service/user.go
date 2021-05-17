@@ -18,6 +18,7 @@ type UserRepo interface {
 	GetById(id int) (*domain.User, error)
 	Update(user *domain.User) error
 	Authenticate(email, password string) (int, error)
+	SetProfileImage(filePath string, userID int) error
 }
 
 func NewUser(repo UserRepo) *user {
@@ -61,6 +62,10 @@ func (u *user) SignIn(email, password string) (int, error) {
 
 func (u *user) FindById(id int) (*domain.User, error) {
 	return u.repo.GetById(id)
+}
+
+func (u *user) UpdateImage(filePath string, userID int) error {
+	return u.repo.SetProfileImage(filePath, userID)
 }
 
 func (u *user) Update(user *domain.User) error {

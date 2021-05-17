@@ -10,16 +10,16 @@ import (
 )
 
 type httpResponser struct {
-	errorLog *log.Logger
+	ErrorLog *log.Logger
 }
 
 func NewHttpResponser(errorLog *log.Logger) http_v1.Responser {
-	return &httpResponser{errorLog: errorLog}
+	return &httpResponser{ErrorLog: errorLog}
 }
 
 func (h *httpResponser) ServerError(c *gin.Context, err error) {
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
-	h.errorLog.Output(2, trace)
+	h.ErrorLog.Output(2, trace)
 
 	http.Error(c.Writer, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }

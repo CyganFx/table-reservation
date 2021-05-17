@@ -29,6 +29,8 @@ create table users
             REFERENCES roles (id)
 );
 
+alter table users add column profile_image_url varchar(255) default '/static/img/default_profile_image.png';
+
 create index users_name_password_idx
     on users (email, password);
 

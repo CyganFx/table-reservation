@@ -40,13 +40,13 @@ func (u *user) Create(name, email, mobile, hashedPassword string, roleId int) er
 }
 
 func (u *user) GetById(id int) (*domain.User, error) {
-	query := `SELECT u.name, u.role_id, r.name, u.email, u.mobile, u.created
+	query := `SELECT u.name, u.role_id, r.name, u.email, u.mobile, u.created, u.profile_image_url
 			FROM users u join roles r on u.role_id = r.id WHERE u.id = $1`
 	user := domain.NewUser()
 
 	err := u.db.QueryRow(context.Background(), query, id).
 		Scan(&user.Name, &user.Role.ID, &user.Role.Name, &user.Email,
-			&user.Mobile, &user.Created)
+			&user.Mobile, &user.Created, &user.ImageURL)
 	if err != nil {
 		if err.Error() == "no rows in result set" {
 			return nil, domain.ErrNoRecord
@@ -96,4 +96,14 @@ func (u *user) Authenticate(email, password string) (int, error) {
 		}
 	}
 	return id, nil
+}
+
+func (u *user) SetProfileImage(filePath string, userID int) error {
+	query := `UPDATE users SET profile_image_url = $1 WHERE id = $2`
+	_, err := u.db.Exec(context.Background(), query, filePath, userID)
+	if err != nil {
+		return fmt.Errorf("failed to update profile image %v", err)
+	}
+
+	return nil
 }

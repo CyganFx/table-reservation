@@ -31,8 +31,16 @@ func addDefaultData(td *templateData, c *gin.Context) *templateData {
 		session.Delete("flash")
 	}
 
+	if session.Get("authenticatedUserID") != nil {
+		if td.User == nil {
+			td.User = domain.NewUser()
+		}
+		td.User.ID = session.Get("authenticatedUserID").(int)
+	}
 	if session.Get("role") != nil {
-		td.User = domain.NewUser()
+		if td.User == nil {
+			td.User = domain.NewUser()
+		}
 		td.User.Role.ID = session.Get("role").(int)
 	}
 

@@ -8,7 +8,7 @@
 .avatar {
     background-size: contain;
     background-repeat: no-repeat;
-    padding: 8em 0;
+    padding: 1em 1em;
     filter: brightness(.9);
     margin: 0;
 }

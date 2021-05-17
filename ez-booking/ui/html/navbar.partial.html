@@ -16,11 +16,13 @@
                     <li class="nav__item"><a href="#about" class="nav__link">About</a></li>
                     <li class="nav__item"><a href="/api/menu" class="nav__link">Menu</a></li>
                     {{if .IsAuthenticated}}
-                        {{if eq .User.Role.ID 1}}
-                            <li class="nav__item"><a href="#" class="nav__link">Profile</a></li>
-                        {{end}}
+                        <li class="nav__item"><a href="/api/users/profile/{{.User.ID}}" class="nav__link">Profile</a>
+                        </li>
+                        {{/*                        {{if eq .User.Role.ID 1}}*/}}
+                        {{/*                        {{end}}*/}}
                     {{end}}
-                    <li class="nav__item"><a href="/api/reservation/cafe/1" class="nav__link">Reservation for cafe with id 1</a></li>
+                    <li class="nav__item"><a href="/api/reservation/cafe/1" class="nav__link">Reservation for cafe with
+                            id 1</a></li>
                     <li class="nav__item"><a href="#services" class="nav__link">Services</a></li>
                     <li class="nav__item"><a href="#footer" class="nav__link">Contact us</a></li>
                     {{if .IsAuthenticated}}

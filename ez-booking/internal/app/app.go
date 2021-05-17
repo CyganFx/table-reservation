@@ -50,7 +50,7 @@ func Run(port string) {
 	userService := service.NewUser(userRepo)
 	reservationService := service.NewReservation(reservationRepo)
 	restErrorsResponser := rest_errors.NewHttpResponser(errorLog)
-	handler := http_v1.NewHandler(userService, reservationService, restErrorsResponser, templateCache)
+	handler := http_v1.NewHandler(userService, reservationService, restErrorsResponser, infoLog, templateCache)
 
 	srv := &http.Server{
 		Addr:         *addr,
@@ -62,6 +62,5 @@ func Run(port string) {
 	}
 
 	infoLog.Printf("Starting http server on %v", *addr)
-	err = srv.ListenAndServe()
-	errorLog.Fatal(err)
+	errorLog.Fatal(srv.ListenAndServe())
 }

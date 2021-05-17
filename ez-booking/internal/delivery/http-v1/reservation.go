@@ -110,8 +110,7 @@ func setTimeSelector(data *ReservationData) {
 
 func setPartySizeSelector(data *ReservationData) {
 	for partySize := 1; partySize <= maxTableCapacity; partySize++ {
-		data.PartySizeSelector = append(data.PartySizeSelector,
-			partySize)
+		data.PartySizeSelector = append(data.PartySizeSelector, partySize)
 	}
 }
 
@@ -229,7 +228,6 @@ func (h *handler) Confirm(c *gin.Context) {
 			h.errors.NotFound(c)
 			return
 		}
-		fmt.Println(u)
 		form.Add("name", u.Name)
 		form.Add("mobile", u.Mobile)
 		form.Add("email", u.Email)

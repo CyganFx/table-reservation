@@ -1,29 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<section class="profile-card">
-    <div class="image-container">
-        <figure class="avatar"></figure>
-        <figcaption class="title">
-            <h2><?= $username ?></h2>
-        </figcaption>
-    </div>
-    <article class="main-container">
-        <p><i class="fa fa-id-card-o info"></i><?= $first_name . ' ' . $surname ?></p>
-        <p><i class="fa fa-book info"></i>
-
-        </p>
-        <p>
-            <i class="fa fa-calendar-o info"></i>
-        </p>
-        <p><i class="fa fa-envelope info"></i><?= $email ?></p>
-        <p>
-            <i class="fa fa-phone info"></i>
-        </p>
-    </article>
-</body>
-</html>
+{{template "base-layout" .}}
+{{define "title"}} Profile {{end}}
+{{define "content"}}
+    <br><br><br>
+    {{with .User}}
+        <section class="profile-card">
+            <h1>Profile</h1>
+            <div class="image-container">
+                <figure class="avatar"><img src="{{.ImageURL}}" alt="profile-image" height="150px" width="150px">
+                </figure>
+                <figcaption class="title">
+                    <h2>{{.Name}}</h2>
+                </figcaption>
+                <p class="text">Update Image: </p>
+                <form action="/api/users/set-image" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="id" value="{{.ID}}">
+                    <input type="file" name="profile-image"> <br>
+                    <input type="submit" value="Upload">
+                </form>
+            </div>
+            <article class="main-container">
+                <p><i class="fa fa-envelope info"></i>{{.Email}}</p>
+                <p><i class="fa fa-phone info"> {{.Mobile}}</i></p>
+            </article>
+        </section>
+    {{end}}
+{{end}}

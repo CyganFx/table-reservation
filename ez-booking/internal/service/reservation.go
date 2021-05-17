@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	http_v1 "github.com/CyganFx/table-reservation/ez-booking/internal/delivery/http-v1"
 	"github.com/CyganFx/table-reservation/ez-booking/pkg/domain"
 	"github.com/CyganFx/table-reservation/ez-booking/pkg/validator/forms"
@@ -66,7 +65,6 @@ func (r *reservation) BookTable(form *forms.FormValidator, userChoice http_v1.Us
 
 	reservation := domain.NewReservation()
 	if userID != nil {
-		fmt.Println("I am in service, userid: ", userID)
 		reservation.User.ID = userID.(int)
 	} else {
 		reservation.User.ID = -1
