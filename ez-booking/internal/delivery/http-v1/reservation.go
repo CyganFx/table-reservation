@@ -8,6 +8,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 )
@@ -36,13 +37,16 @@ type ReservationService interface {
 	GetAvailableTables(cafeID, partySize, locationID int, date, bookTime string) ([]*domain.Table, error)
 	GetLocationsByCafeID(cafeID int) ([]*domain.Location, error)
 	GetEventsByCafeID(cafeID int) ([]*domain.Event, error)
-	BookTable(form *forms.FormValidator, userChoice UserChoice) (int, *forms.FormValidator, error)
+	BookTable(form *forms.FormValidator, userChoice UserChoice, userID interface{}) (int, *forms.FormValidator, error)
 }
 
 type ReservationData struct {
 	CafeID            int
 	CurrentDate       string
 	MaxBookingDate    string
+	CustName          string
+	CustEmail         string
+	CustMobile        string
 	TimeSelector      []string
 	PartySizeSelector []int
 	LocationSelector  []*domain.Location
@@ -212,14 +216,30 @@ func (h *handler) Confirm(c *gin.Context) {
 	userChoice.EventID = eventID
 	userChoice.EventDescription = eventDescription
 	session.Set("userChoice", userChoice)
-	session.Save()
 
 	reservationData := &ReservationData{}
 	reservationData.UserChoice = userChoice
 
+	form := forms.New(url.Values{})
+
+	userID := session.Get("authenticatedUserID")
+	if userID != nil {
+		u, err := h.userService.FindById(userID.(int))
+		if err != nil {
+			h.errors.NotFound(c)
+			return
+		}
+		fmt.Println(u)
+		form.Add("name", u.Name)
+		form.Add("mobile", u.Mobile)
+		form.Add("email", u.Email)
+	}
+
+	session.Save()
+
 	h.render(c, "confirm.page.html", &templateData{
 		ReservationData: reservationData,
-		Form:            forms.New(nil),
+		Form:            form,
 	})
 }
 
@@ -231,12 +251,14 @@ func (h *handler) BookTable(c *gin.Context) {
 
 	session := sessions.Default(c)
 	userChoice := session.Get("userChoice").(UserChoice)
+	userID := session.Get("authenticatedUserID")
+
 	reservationData := &ReservationData{}
 	reservationData.UserChoice = userChoice
 
 	form := forms.New(c.Request.PostForm)
 
-	reservationID, formValidator, err := h.reservationService.BookTable(form, userChoice)
+	reservationID, formValidator, err := h.reservationService.BookTable(form, userChoice, userID)
 	if formValidator != nil {
 		h.render(c, "confirm.page.html", &templateData{
 			ReservationData: reservationData,

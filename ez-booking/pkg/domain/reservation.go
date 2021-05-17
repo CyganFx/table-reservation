@@ -22,6 +22,7 @@ type Reservation struct {
 	Cafe             *Cafe
 	Table            *Table
 	Event            *Event
+	User             *User
 }
 
 type Location struct {
@@ -44,6 +45,7 @@ func NewReservation() *Reservation {
 		Cafe:  &Cafe{},
 		Table: &Table{},
 		Event: &Event{},
+		User:  &User{},
 	}
 }
 

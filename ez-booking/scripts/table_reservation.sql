@@ -106,6 +106,7 @@ values ('default'),
 create table reservations
 (
     id                serial       not null primary key,
+    user_id           int,
     cafe_id           int          not null,
     table_id          int          not null,
     cust_name         varchar(255) not null,
@@ -118,6 +119,9 @@ create table reservations
     CONSTRAINT reservations_fk_cafe_id_table_id
         FOREIGN KEY (cafe_id, table_id)
             REFERENCES tables (cafe_id, id),
+    constraint reservations_fk_user_id
+        foreign key (user_id)
+            references users (id),
     constraint fk_event_id
         foreign key (event_id)
             references events (id)

@@ -1,0 +1,32 @@
+.profile-card {
+    width: 96%;
+    margin: 3.7em auto;
+    background: #fff;
+    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.5);
+}
+
+.avatar {
+    background-size: contain;
+    background-repeat: no-repeat;
+    padding: 8em 0;
+    filter: brightness(.9);
+    margin: 0;
+}
+
+.image-container {
+    position: relative;
+}
+
+.title {
+    padding-left: .2em;
+}
+
+.main-container {
+    padding: .5em;
+    font-size: 1.2em;
+}
+
+.info {
+    margin-right: .5em;
+    color: crimson;
+}

@@ -21,6 +21,7 @@ type UserService interface {
 func (h *handler) initUserRoutes(api *gin.RouterGroup) {
 	users := api.Group("/users")
 	{
+		users.GET("/profile/:id", h.ProfilePage)
 		users.GET("/sign-up", h.SignUpPage)
 		users.POST("/sign-up", h.SignUp)
 
@@ -36,6 +37,26 @@ func (h *handler) initUserRoutes(api *gin.RouterGroup) {
 
 func (h *handler) MainPage(c *gin.Context) {
 	h.render(c, "main.page.html", &templateData{})
+}
+
+func (h *handler) ProfilePage(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil || id < 1 {
+		h.errors.NotFound(c)
+		return
+	}
+	user, err := h.userService.FindById(id)
+	if err != nil {
+		if errors.Is(err, domain.ErrNoRecord) {
+			h.errors.NotFound(c)
+			return
+		} else {
+			h.errors.ServerError(c, err)
+			return
+		}
+	}
+
+	h.render(c, "profile.page.html", &templateData{User: user})
 }
 
 func (h *handler) SignUpPage(c *gin.Context) {
@@ -129,23 +150,7 @@ func (h *handler) Logout(c *gin.Context) {
 }
 
 func (h *handler) ShowById(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil || id < 1 {
-		h.errors.NotFound(c)
-		return
-	}
-	user, err := h.userService.FindById(id)
-	if err != nil {
-		if errors.Is(err, domain.ErrNoRecord) {
-			h.errors.NotFound(c)
-			return
-		} else {
-			h.errors.ServerError(c, err)
-			return
-		}
-	}
-
-	h.render(c, "test.page.html", &templateData{User: user})
+	panic("imlement me")
 }
 
 func (h *handler) Update(c *gin.Context) {

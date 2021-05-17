@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<section class="profile-card">
+    <div class="image-container">
+        <figure class="avatar"></figure>
+        <figcaption class="title">
+            <h2><?= $username ?></h2>
+        </figcaption>
+    </div>
+    <article class="main-container">
+        <p><i class="fa fa-id-card-o info"></i><?= $first_name . ' ' . $surname ?></p>
+        <p><i class="fa fa-book info"></i>
+
+        </p>
+        <p>
+            <i class="fa fa-calendar-o info"></i>
+        </p>
+        <p><i class="fa fa-envelope info"></i><?= $email ?></p>
+        <p>
+            <i class="fa fa-phone info"></i>
+        </p>
+    </article>
+</body>
+</html>

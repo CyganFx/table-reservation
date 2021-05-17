@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/CyganFx/table-reservation/ez-booking/pkg/domain"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -104,10 +105,10 @@ func (r *reservation) GetSuitableTables(cafeID, partySize, locationID int, date,
 }
 
 func (r *reservation) BookTable(reservation *domain.Reservation) error {
-	query := `INSERT INTO reservations(cafe_id, table_id, event_id, event_description,
+	query := `INSERT INTO reservations(cafe_id, user_id, table_id, event_id, event_description,
 				cust_name, cust_mobile, cust_email, num_of_persons, date)
-				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id;`
-	err := r.db.QueryRow(context.Background(), query, reservation.Cafe.ID, reservation.Table.ID, reservation.Event.ID,
+				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id;`
+	err := r.db.QueryRow(context.Background(), query, reservation.Cafe.ID, newNullInt(int32(reservation.User.ID)), reservation.Table.ID, reservation.Event.ID,
 		reservation.EventDescription, reservation.CustName, reservation.CustMobile,
 		reservation.CustEmail, reservation.PartySize, reservation.Date).
 		Scan(&reservation.ID)
@@ -116,4 +117,14 @@ func (r *reservation) BookTable(reservation *domain.Reservation) error {
 	}
 
 	return nil
+}
+
+func newNullInt(n int32) sql.NullInt32 {
+	if n == -1 {
+		return sql.NullInt32{}
+	}
+	return sql.NullInt32{
+		Int32: n,
+		Valid: true,
+	}
 }
