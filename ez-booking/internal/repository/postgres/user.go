@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/CyganFx/table-reservation/ez-booking/pkg/domain"
+	"github.com/CyganFx/table-reservation/ez-booking/internal/domain"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"golang.org/x/crypto/bcrypt"

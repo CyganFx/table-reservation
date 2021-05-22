@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/CyganFx/table-reservation/ez-booking/pkg/domain"
+	"github.com/CyganFx/table-reservation/ez-booking/internal/domain"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -90,8 +90,8 @@ func (r *reservation) GetSuitableTables(cafeID, partySize, locationID int, date,
 	var tt []*domain.Table
 
 	for rows.Next() {
-		t := &domain.Table{}
-		err = rows.Scan(&t.ID, &t.Capacity, &t.LocationID)
+		t := domain.NewTable()
+		err = rows.Scan(&t.ID, &t.Capacity, &t.Location.ID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to assign values to table struct from row %v", err)
 		}
@@ -109,7 +109,7 @@ func (r *reservation) BookTable(reservation *domain.Reservation) error {
 				cust_name, cust_mobile, cust_email, num_of_persons, date)
 				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id;`
 	err := r.db.QueryRow(context.Background(), query, reservation.Cafe.ID, newNullInt(int32(reservation.User.ID)), reservation.Table.ID, reservation.Event.ID,
-		reservation.EventDescription, reservation.CustName, reservation.CustMobile,
+		newNullString(reservation.EventDescription), reservation.CustName, reservation.CustMobile,
 		reservation.CustEmail, reservation.PartySize, reservation.Date).
 		Scan(&reservation.ID)
 	if err != nil {
@@ -127,4 +127,48 @@ func newNullInt(n int32) sql.NullInt32 {
 		Int32: n,
 		Valid: true,
 	}
+}
+
+func newNullString(s string) sql.NullString {
+	if s == "" {
+		return sql.NullString{}
+	}
+	return sql.NullString{
+		String: s,
+		Valid:  true,
+	}
+}
+
+func (r *reservation) GetUserReservations(userID int) ([]*domain.Reservation, error) {
+	query := `SELECT r.id, r.cafe_id, c.name, r.table_id,
+			t.location_id, l.name, r.event_id, e.name, r.num_of_persons, r.date
+			from reservations r
+			join cafes c on r.cafe_id = c.id
+			join tables t on r.table_id = t.id
+			join locations l on t.location_id = l.id
+			join events e on r.event_id = e.id
+			WHERE r.user_id = $1;`
+
+	rows, err := r.db.Query(context.Background(), query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var rr []*domain.Reservation
+
+	for rows.Next() {
+		r := domain.NewReservation()
+		err = rows.Scan(&r.ID, &r.Cafe.ID, &r.Cafe.Name, &r.Table.ID, &r.Table.Location.ID,
+			&r.Table.Location.Name, &r.Event.ID, &r.Event.Name, &r.PartySize, &r.TimeStampDate)
+		if err != nil {
+			return nil, fmt.Errorf("failed to assign values to Reservation struct from row: %v", err)
+		}
+		rr = append(rr, r)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return rr, nil
 }

@@ -1,7 +1,7 @@
 package http_v1
 
 import (
-	"github.com/CyganFx/table-reservation/ez-booking/pkg/domain"
+	"github.com/CyganFx/table-reservation/ez-booking/internal/domain"
 	"github.com/CyganFx/table-reservation/ez-booking/pkg/validator/forms"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -41,6 +41,7 @@ type Responser interface {
 type templateData struct {
 	User            *domain.User
 	ReservationData *ReservationData
+	Reservations    []*domain.Reservation
 	Form            *forms.FormValidator
 	CurrentYear     int
 	Flash           string
@@ -63,11 +64,10 @@ func (h *handler) Init() *gin.Engine {
 	router := gin.New()
 
 	sessionStore := cookie.NewStore([]byte(os.Getenv("SESSION_SECRET")))
-
 	awsSession := ConnectAws()
 
 	router.Use(sessions.Sessions("mySessionStore", sessionStore),
-		gin.Logger(), gin.Recovery(), SecureHeaders(),
+		gin.Logger(), gin.Recovery(), h.SecureHeaders(),
 		func(c *gin.Context) {
 			c.Set("awsSession", awsSession)
 			c.Next()

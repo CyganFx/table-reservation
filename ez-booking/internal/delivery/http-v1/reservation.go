@@ -2,24 +2,12 @@ package http_v1
 
 import (
 	"encoding/gob"
-	"fmt"
-	"github.com/CyganFx/table-reservation/ez-booking/pkg/domain"
+	"github.com/CyganFx/table-reservation/ez-booking/internal/domain"
 	"github.com/CyganFx/table-reservation/ez-booking/pkg/validator/forms"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"net/url"
 	"strconv"
-	"time"
-)
-
-const (
-	maxDaysToBookInAdvance       = 7
-	amountOfHoursRestaurantWorks = 15 // for now let every restaurant work from 11:00 to 2:00
-	possibleBookingsPerHour      = 4
-	restaurantOpeningTimeHours   = 11
-	minutesInHour                = 60
-	maxTableCapacity             = 8 //assume that max table size is 8 for all restaurants
 )
 
 func (h *handler) initReservationRoutes(api *gin.RouterGroup) {
@@ -38,6 +26,8 @@ type ReservationService interface {
 	GetLocationsByCafeID(cafeID int) ([]*domain.Location, error)
 	GetEventsByCafeID(cafeID int) ([]*domain.Event, error)
 	BookTable(form *forms.FormValidator, userChoice UserChoice, userID interface{}) (int, *forms.FormValidator, error)
+	GetUserBookings(userID int) ([]*domain.Reservation, error)
+	SetDefaultReservationData(data *ReservationData, cafeID int) error
 }
 
 type ReservationData struct {
@@ -59,77 +49,11 @@ type UserChoice struct {
 	CafeID           int
 	TableID          int
 	EventID          int
-	EventDescription string
+	LocationID       int
 	PartySize        int
+	EventDescription string
 	Date             string
 	BookTime         string
-}
-
-func (h *handler) setReservationData(data *ReservationData, cafeID int) error {
-	data.CafeID = cafeID
-	data.CurrentDate = time.Now().Format("2006-01-02")
-	data.MaxBookingDate =
-		time.Now().AddDate(0, 0, maxDaysToBookInAdvance).Format("2006-01-02")
-
-	setTimeSelector(data)
-	setPartySizeSelector(data)
-	err := setLocationSelector(h, data, cafeID)
-	if err != nil {
-		return err
-	}
-	err = setEventSelector(h, data, cafeID)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func setTimeSelector(data *ReservationData) {
-	hours := restaurantOpeningTimeHours
-	minutes := 0
-	addZeroToMinutes := "0"
-	addZeroToHours := ""
-	for i := 0; i <= amountOfHoursRestaurantWorks*possibleBookingsPerHour-possibleBookingsPerHour; i++ {
-		if i%4 == 0 && i != 0 {
-			minutes = 0
-			hours++
-			addZeroToMinutes = "0"
-		}
-		if hours == 24 {
-			hours = 0
-			addZeroToHours = "0"
-		}
-
-		data.TimeSelector = append(data.TimeSelector,
-			fmt.Sprintf("%s%d:%d%s", addZeroToHours, hours, minutes, addZeroToMinutes))
-
-		addZeroToMinutes = ""
-		minutes += minutesInHour / possibleBookingsPerHour
-	}
-}
-
-func setPartySizeSelector(data *ReservationData) {
-	for partySize := 1; partySize <= maxTableCapacity; partySize++ {
-		data.PartySizeSelector = append(data.PartySizeSelector, partySize)
-	}
-}
-
-func setLocationSelector(h *handler, data *ReservationData, cafeID int) error {
-	var err error
-	data.LocationSelector, err = h.reservationService.GetLocationsByCafeID(cafeID)
-	if err != nil {
-		return fmt.Errorf("trouble getting locations %v", err)
-	}
-	return nil
-}
-
-func setEventSelector(h *handler, data *ReservationData, cafeID int) error {
-	var err error
-	data.EventSelector, err = h.reservationService.GetEventsByCafeID(cafeID)
-	if err != nil {
-		return fmt.Errorf("trouble getting events %v", err)
-	}
-	return nil
 }
 
 func (h *handler) ReservationPage(c *gin.Context) {
@@ -140,7 +64,7 @@ func (h *handler) ReservationPage(c *gin.Context) {
 	}
 
 	reservationData := &ReservationData{}
-	err = h.setReservationData(reservationData, cafeID)
+	err = h.reservationService.SetDefaultReservationData(reservationData, cafeID)
 	if err != nil {
 		h.errors.ServerError(c, err)
 		return
@@ -165,10 +89,11 @@ func (h *handler) GetAvailableTables(c *gin.Context) {
 	partySize, _ := strconv.Atoi(c.Request.FormValue("party_size"))
 
 	userChoice := &UserChoice{
-		CafeID:    cafeID,
-		PartySize: partySize,
-		Date:      date,
-		BookTime:  bookTime,
+		CafeID:     cafeID,
+		PartySize:  partySize,
+		Date:       date,
+		BookTime:   bookTime,
+		LocationID: locationID,
 	}
 
 	session := sessions.Default(c)
@@ -176,7 +101,7 @@ func (h *handler) GetAvailableTables(c *gin.Context) {
 	session.Save()
 
 	reservationData := &ReservationData{}
-
+	reservationData.UserChoice = *userChoice
 	reservationData.Tables, err = h.reservationService.GetAvailableTables(cafeID, partySize, locationID, date, bookTime)
 	if err != nil {
 		h.errors.ServerError(c, err)
@@ -188,11 +113,12 @@ func (h *handler) GetAvailableTables(c *gin.Context) {
 		t.CapacityForHTML = tempCapacityForHTML
 	}
 
-	err = h.setReservationData(reservationData, cafeID)
+	err = h.reservationService.SetDefaultReservationData(reservationData, cafeID)
 	if err != nil {
 		h.errors.ServerError(c, err)
 		return
 	}
+	reservationData.CurrentDate = date
 
 	h.render(c, "reservation.page.html", &templateData{
 		ReservationData: reservationData,
@@ -209,31 +135,12 @@ func (h *handler) Confirm(c *gin.Context) {
 	eventID, _ := strconv.Atoi(c.Request.FormValue("event_id"))
 	eventDescription := c.Request.FormValue("event_description")
 
-	session := sessions.Default(c)
-	userChoice := session.Get("userChoice").(UserChoice)
-	userChoice.TableID = tableID
-	userChoice.EventID = eventID
-	userChoice.EventDescription = eventDescription
-	session.Set("userChoice", userChoice)
-
 	reservationData := &ReservationData{}
-	reservationData.UserChoice = userChoice
-
-	form := forms.New(url.Values{})
-
-	userID := session.Get("authenticatedUserID")
-	if userID != nil {
-		u, err := h.userService.FindById(userID.(int))
-		if err != nil {
-			h.errors.NotFound(c)
-			return
-		}
-		form.Add("name", u.Name)
-		form.Add("mobile", u.Mobile)
-		form.Add("email", u.Email)
+	form, err := h.userService.SetConfirmData(c, reservationData, tableID, eventID, eventDescription)
+	if err != nil {
+		h.errors.NotFound(c)
+		return
 	}
-
-	session.Save()
 
 	h.render(c, "confirm.page.html", &templateData{
 		ReservationData: reservationData,
@@ -268,6 +175,7 @@ func (h *handler) BookTable(c *gin.Context) {
 		return
 	}
 
+	session.Delete("userChoice")
 	session.Set("reservationID", reservationID)
 	session.Set("flash", "Booked successfully! You will get notifications as your time comes")
 	session.Save()
