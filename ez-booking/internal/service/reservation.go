@@ -5,6 +5,7 @@ import (
 	http_v1 "github.com/CyganFx/table-reservation/ez-booking/internal/delivery/http-v1"
 	"github.com/CyganFx/table-reservation/ez-booking/internal/domain"
 	"github.com/CyganFx/table-reservation/ez-booking/pkg/validator/forms"
+	"github.com/pkg/errors"
 	"strconv"
 	"time"
 )
@@ -17,6 +18,11 @@ const (
 	restaurantOpeningTimeHours   = 11
 	maxTableCapacity             = 8 //assume that max table size is 8 for all restaurants
 	bookTimeSelectInterval       = 15
+
+	dateLayout = "2006-01-02"
+	timeLayout = "15:04:05"
+
+	minutesBeforeNotify = 60
 )
 
 type reservation struct {
@@ -59,6 +65,26 @@ func (r *reservation) GetAvailableTables(cafeID, partySize, locationID int, date
 	return r.repo.GetSuitableTables(cafeID, partySize, locationID, date, minPossibleBookingTime, maxPossibleBookingTime)
 }
 
+func setBookAndNotifyDate(strBookDate, strBookTime string, bookDate, notifyDate *time.Time) error {
+	partialDate, err := time.Parse(dateLayout, strBookDate)
+	if err != nil {
+		return errors.Wrap(err, "failed to parse string date")
+	}
+
+	bookTime, err := time.Parse(timeLayout, strBookTime)
+	if err != nil {
+		return errors.Wrap(err, "failed to parse string bookTime")
+	}
+
+	*bookDate = partialDate.Add(time.Hour*time.Duration(bookTime.Hour()) +
+		time.Minute*time.Duration(bookTime.Minute()) +
+		time.Second*time.Duration(bookTime.Second()))
+
+	*notifyDate = bookDate.Add(time.Minute * time.Duration(-minutesBeforeNotify))
+
+	return nil
+}
+
 func (r *reservation) BookTable(form *forms.FormValidator, userChoice http_v1.UserChoice, userID interface{}) (int, *forms.FormValidator, error) {
 	form.Required("name", "mobile", "email")
 	form.MatchesPattern("email", forms.EmailRX)
@@ -70,9 +96,13 @@ func (r *reservation) BookTable(form *forms.FormValidator, userChoice http_v1.Us
 		return -1, form, nil
 	}
 
-	date := userChoice.Date
-	bookTime := userChoice.BookTime + ":00"
-	timeStampLikeDate := date + " " + bookTime
+	var bookDate, notifyDate time.Time
+	strBookTime := userChoice.BookTime + ":00"
+
+	err := setBookAndNotifyDate(userChoice.Date, strBookTime, &bookDate, &notifyDate)
+	if err != nil {
+		return -1, form, err
+	}
 
 	reservation := domain.NewReservation()
 	if userID != nil {
@@ -80,7 +110,8 @@ func (r *reservation) BookTable(form *forms.FormValidator, userChoice http_v1.Us
 	} else {
 		reservation.User.ID = -1
 	}
-	reservation.Date = timeStampLikeDate
+	reservation.Date = bookDate
+	reservation.NotifyDate = notifyDate
 	reservation.CustName = form.Get("name")
 	reservation.CustMobile = form.Get("mobile")
 	reservation.CustEmail = form.Get("email")
@@ -105,14 +136,14 @@ func (r *reservation) GetUserBookings(userID int) ([]*domain.Reservation, error)
 
 	now := time.Now()
 	for _, r := range rr {
-		if r.TimeStampDate.Year() == now.Year() &&
-			int(r.TimeStampDate.Month()) == int(now.Month()) &&
-			r.TimeStampDate.Day() == now.Day() {
+		if r.Date.Year() == now.Year() &&
+			int(r.Date.Month()) == int(now.Month()) &&
+			r.Date.Day() == now.Day() {
 
-			if r.TimeStampDate.Hour() > now.Hour() {
+			if r.Date.Hour() > now.Hour() {
 				r.IsActive = true
-				r.HoursUntilReservation = r.TimeStampDate.Hour() - now.Hour()
-				r.MinutesUntilReservation = r.TimeStampDate.Minute() - now.Minute()
+				r.HoursUntilReservation = r.Date.Hour() - now.Hour()
+				r.MinutesUntilReservation = r.Date.Minute() - now.Minute()
 			}
 		}
 	}

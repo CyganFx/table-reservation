@@ -106,11 +106,11 @@ func (r *reservation) GetSuitableTables(cafeID, partySize, locationID int, date,
 
 func (r *reservation) BookTable(reservation *domain.Reservation) error {
 	query := `INSERT INTO reservations(cafe_id, user_id, table_id, event_id, event_description,
-				cust_name, cust_mobile, cust_email, num_of_persons, date)
-				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id;`
+				cust_name, cust_mobile, cust_email, num_of_persons, date, notify_date)
+				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id;`
 	err := r.db.QueryRow(context.Background(), query, reservation.Cafe.ID, newNullInt(int32(reservation.User.ID)), reservation.Table.ID, reservation.Event.ID,
 		newNullString(reservation.EventDescription), reservation.CustName, reservation.CustMobile,
-		reservation.CustEmail, reservation.PartySize, reservation.Date).
+		reservation.CustEmail, reservation.PartySize, reservation.Date, reservation.NotifyDate).
 		Scan(&reservation.ID)
 	if err != nil {
 		return fmt.Errorf("failed to book table: %v", err)
@@ -160,7 +160,7 @@ func (r *reservation) GetUserReservations(userID int) ([]*domain.Reservation, er
 	for rows.Next() {
 		r := domain.NewReservation()
 		err = rows.Scan(&r.ID, &r.Cafe.ID, &r.Cafe.Name, &r.Table.ID, &r.Table.Location.ID,
-			&r.Table.Location.Name, &r.Event.ID, &r.Event.Name, &r.PartySize, &r.TimeStampDate)
+			&r.Table.Location.Name, &r.Event.ID, &r.Event.Name, &r.PartySize, &r.Date)
 		if err != nil {
 			return nil, fmt.Errorf("failed to assign values to Reservation struct from row: %v", err)
 		}

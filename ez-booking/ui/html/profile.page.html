@@ -28,10 +28,10 @@
     <ul class="list-group list-group flush">
         {{range .Reservations}}
             {{if .IsActive}}
-                <li class="list-group-item active">{{.TimeStampDate | humanDate}} - {{.Cafe.Name}}
+                <li class="list-group-item active">{{.Date | humanDate}} - {{.Cafe.Name}}
                     for {{.PartySize}} people Table - {{.Table.ID}}</li>
             {{else}}
-                <li class="list-group-item">{{.TimeStampDate | humanDate}} - {{.Cafe.Name}}
+                <li class="list-group-item">{{.Date | humanDate}} - {{.Cafe.Name}}
                     for {{.PartySize}} people Table - {{.Table.ID}}</li>
             {{end}}
         {{end}}

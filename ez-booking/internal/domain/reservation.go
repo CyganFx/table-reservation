@@ -22,16 +22,16 @@ type Reservation struct {
 	CustName                string
 	CustMobile              string
 	CustEmail               string
-	Date                    string //using string for convenience
 	EventDescription        string
-	HoursUntilReservation   int       // not in db
-	MinutesUntilReservation int       // not in db
-	IsActive                bool      // not in db
-	TimeStampDate           time.Time // not in db
+	Date                    time.Time
+	NotifyDate              time.Time
 	Cafe                    *Cafe
 	Table                   *Table
 	Event                   *Event
 	User                    *User
+	HoursUntilReservation   int  // not in db
+	MinutesUntilReservation int  // not in db
+	IsActive                bool // not in db
 }
 
 type Location struct {

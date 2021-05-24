@@ -29,7 +29,8 @@ create table users
             REFERENCES roles (id)
 );
 
-alter table users add column profile_image_url varchar(255) default '/static/img/default_profile_image.png';
+alter table users
+    add column profile_image_url varchar(255) default '/static/img/default_profile_image.png';
 
 create index users_name_password_idx
     on users (email, password);
@@ -118,6 +119,7 @@ create table reservations
     event_description text,
     num_of_persons    int          not null,
     date              timestamp    not null,
+    notify_date       timestamp    not null,
     CONSTRAINT reservations_fk_cafe_id_table_id
         FOREIGN KEY (cafe_id, table_id)
             REFERENCES tables (cafe_id, id),
@@ -128,6 +130,7 @@ create table reservations
         foreign key (event_id)
             references events (id)
 );
+
 
 create table cafes_events
 (
