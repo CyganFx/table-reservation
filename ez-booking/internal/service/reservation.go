@@ -5,7 +5,6 @@ import (
 	http_v1 "github.com/CyganFx/table-reservation/ez-booking/internal/delivery/http-v1"
 	"github.com/CyganFx/table-reservation/ez-booking/internal/domain"
 	"github.com/CyganFx/table-reservation/ez-booking/pkg/validator/forms"
-	"github.com/pkg/errors"
 	"strconv"
 	"time"
 )
@@ -148,41 +147,48 @@ func (r *reservation) setTimeSelector(data *http_v1.ReservationData) error {
 	addZeroToMinutes := "0"
 	addZeroToHours := ""
 
-	now := time.Now()
+	//now := time.Now()
+	//
+	//if now.Hour()-restaurantOpeningTimeHours >= 0 &&
+	//	(data.UserChoice == http_v1.UserChoice{} ||
+	//		data.UserChoice.Date == now.Format("2006-01-02")) {
+	//	hours = now.Hour()
+	//	if hours == 0 {
+	//		addZeroToHours = "0"
+	//	}
+	//
+	//	minutes = time.Now().Minute()
+	//	if minutes != 0 {
+	//		addZeroToMinutes = ""
+	//		for minutes % 15 != 0 {
+	//			if minutes == 60 {
+	//				hours++
+	//				if hours == 24 {
+	//					hours = 0
+	//					addZeroToHours = "0"
+	//				}
+	//				minutes = 0
+	//				break
+	//			}
+	//			minutes++
+	//		}
+	//	}
+	//}
+	//
+	//var possibleBookingIntervalsLength int
+	//considerMinutes := 0
+	//
+	//if minutes != 0 {
+	//	considerMinutes = minutes / bookTimeSelectInterval
+	//}
+	//
+	//if hours == restaurantOpeningTimeHours {
+	//	possibleBookingIntervalsLength = amountOfHoursRestaurantWorks*possibleBookingsPerHour - considerMinutes - (reservationInterval / bookTimeSelectInterval)
+	//} else {
+	//	possibleBookingIntervalsLength = (amountOfHoursRestaurantWorks-(hours-restaurantOpeningTimeHours))*possibleBookingsPerHour - considerMinutes - (reservationInterval / bookTimeSelectInterval)
+	//}
 
-	if data.UserChoice.Date == now.Format("2006-01-02") &&
-		now.Hour()-restaurantOpeningTimeHours >= 0 {
-		var err error
-
-		hours, err = strconv.Atoi(data.UserChoice.BookTime[:2])
-		if err != nil {
-			return errors.Wrap(err, "Failed to get bookTime hours")
-		}
-		if hours == 0 {
-			addZeroToHours = "0"
-		}
-
-		minutes, err = strconv.Atoi(data.UserChoice.BookTime[3:5])
-		if err != nil {
-			return errors.Wrap(err, "Failed to get bookTime minutes")
-		}
-		if minutes != 0 {
-			addZeroToMinutes = ""
-		}
-	}
-
-	var possibleBookingIntervalsLength int
-	considerMinutes := 0
-
-	if minutes != 0 {
-		considerMinutes = minutes / bookTimeSelectInterval
-	}
-
-	if hours == restaurantOpeningTimeHours {
-		possibleBookingIntervalsLength = amountOfHoursRestaurantWorks*possibleBookingsPerHour - considerMinutes - (reservationInterval / bookTimeSelectInterval)
-	} else {
-		possibleBookingIntervalsLength = (amountOfHoursRestaurantWorks-(hours-restaurantOpeningTimeHours))*possibleBookingsPerHour - considerMinutes - (reservationInterval / bookTimeSelectInterval)
-	}
+	possibleBookingIntervalsLength := amountOfHoursRestaurantWorks*possibleBookingsPerHour - (reservationInterval / bookTimeSelectInterval)
 
 	for i := 0; i <= possibleBookingIntervalsLength; i++ {
 		if minutes == 60 {
