@@ -22,11 +22,11 @@ func (h *handler) initReservationRoutes(api *gin.RouterGroup) {
 }
 
 type ReservationService interface {
-	GetAvailableTables(cafeID, partySize, locationID int, date, bookTime string) ([]*domain.Table, error)
-	GetLocationsByCafeID(cafeID int) ([]*domain.Location, error)
-	GetEventsByCafeID(cafeID int) ([]*domain.Event, error)
+	GetAvailableTables(cafeID, partySize, locationID int, date, bookTime string) ([]domain.Table, error)
+	GetLocationsByCafeID(cafeID int) ([]domain.Location, error)
+	GetEventsByCafeID(cafeID int) ([]domain.Event, error)
 	BookTable(form *forms.FormValidator, userChoice UserChoice, userID interface{}) (int, *forms.FormValidator, error)
-	GetUserBookings(userID int) ([]*domain.Reservation, error)
+	GetUserBookings(userID int) ([]domain.Reservation, error)
 	SetDefaultReservationData(data *ReservationData, cafeID int) error
 }
 
@@ -39,9 +39,9 @@ type ReservationData struct {
 	CustMobile        string
 	TimeSelector      []string
 	PartySizeSelector []int
-	LocationSelector  []*domain.Location
-	EventSelector     []*domain.Event
-	Tables            []*domain.Table
+	LocationSelector  []domain.Location
+	EventSelector     []domain.Event
+	Tables            []domain.Table
 	UserChoice        UserChoice
 }
 
@@ -108,9 +108,9 @@ func (h *handler) GetAvailableTables(c *gin.Context) {
 		return
 	}
 
-	for _, t := range reservationData.Tables {
+	for idx, t := range reservationData.Tables {
 		tempCapacityForHTML := make([]int, t.Capacity)
-		t.CapacityForHTML = tempCapacityForHTML
+		reservationData.Tables[idx].CapacityForHTML = tempCapacityForHTML
 	}
 
 	err = h.reservationService.SetDefaultReservationData(reservationData, cafeID)

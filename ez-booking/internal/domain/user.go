@@ -20,13 +20,11 @@ type User struct {
 	ImageURL string    `json:"imageURL"`
 	Password []byte    `json:"password"`
 	Created  time.Time `json:"created"`
-	Role     *Role     `json:"role"`
+	Role     Role      `json:"role"`
 }
 
 func NewUser() *User {
-	return &User{
-		Role: &Role{},
-	}
+	return &User{}
 }
 
 type Role struct {

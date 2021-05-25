@@ -41,7 +41,7 @@ type Responser interface {
 type templateData struct {
 	User            *domain.User
 	ReservationData *ReservationData
-	Reservations    []*domain.Reservation
+	Reservations    []domain.Reservation
 	Form            *forms.FormValidator
 	CurrentYear     int
 	Flash           string

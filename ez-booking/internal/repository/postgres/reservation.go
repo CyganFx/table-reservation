@@ -6,6 +6,36 @@ import (
 	"fmt"
 	"github.com/CyganFx/table-reservation/ez-booking/internal/domain"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"sync"
+)
+
+//in order to make slices with initial capacity to increase performance
+const (
+	maxNumOfLocations = 10
+	maxNumOfEvents    = 10
+)
+
+var (
+	tablesPool = sync.Pool{
+		New: func() interface{} {
+			return domain.NewTable()
+		},
+	}
+	eventsPool = sync.Pool{
+		New: func() interface{} {
+			return &domain.Event{}
+		},
+	}
+	locationsPool = sync.Pool{
+		New: func() interface{} {
+			return &domain.Location{}
+		},
+	}
+	reservationsPool = sync.Pool{
+		New: func() interface{} {
+			return domain.NewReservation()
+		},
+	}
 )
 
 type reservation struct {
@@ -16,7 +46,7 @@ func NewReservation(db *pgxpool.Pool) *reservation {
 	return &reservation{db: db}
 }
 
-func (r *reservation) GetAvailableLocationsByCafeID(cafeID int) ([]*domain.Location, error) {
+func (r *reservation) GetAvailableLocationsByCafeID(cafeID int) ([]domain.Location, error) {
 	query := `SELECT DISTINCT t.location_id, l.name FROM locations l
 				JOIN tables t on t.location_id = l.id WHERE t.cafe_id = $1`
 	rows, err := r.db.Query(context.Background(), query, cafeID)
@@ -25,15 +55,18 @@ func (r *reservation) GetAvailableLocationsByCafeID(cafeID int) ([]*domain.Locat
 	}
 	defer rows.Close()
 
-	var ll []*domain.Location
+	ll := make([]domain.Location, 0, maxNumOfLocations)
 
 	for rows.Next() {
-		l := &domain.Location{}
+		l := locationsPool.Get().(*domain.Location)
 		err = rows.Scan(&l.ID, &l.Name)
 		if err != nil {
 			return nil, fmt.Errorf("failed to assign values to location struct from row %v", err)
 		}
-		ll = append(ll, l)
+		ll = append(ll, *l)
+
+		*l = domain.Location{}
+		locationsPool.Put(l)
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err
@@ -42,7 +75,7 @@ func (r *reservation) GetAvailableLocationsByCafeID(cafeID int) ([]*domain.Locat
 	return ll, nil
 }
 
-func (r *reservation) GetAvailableEventsByCafeID(cafeID int) ([]*domain.Event, error) {
+func (r *reservation) GetAvailableEventsByCafeID(cafeID int) ([]domain.Event, error) {
 	query := `SELECT DISTINCT e.id, e.name FROM events e
 				JOIN cafes_events ce on e.id = ce.event_id WHERE ce.cafe_id = $1`
 	rows, err := r.db.Query(context.Background(), query, cafeID)
@@ -51,15 +84,18 @@ func (r *reservation) GetAvailableEventsByCafeID(cafeID int) ([]*domain.Event, e
 	}
 	defer rows.Close()
 
-	var ee []*domain.Event
+	ee := make([]domain.Event, 0, maxNumOfEvents)
 
 	for rows.Next() {
-		e := &domain.Event{}
+		e := eventsPool.Get().(*domain.Event)
 		err = rows.Scan(&e.ID, &e.Name)
 		if err != nil {
 			return nil, fmt.Errorf("failed to assign values to event struct from row %v", err)
 		}
-		ee = append(ee, e)
+		ee = append(ee, *e)
+
+		*e = domain.Event{}
+		eventsPool.Put(e)
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err
@@ -68,7 +104,7 @@ func (r *reservation) GetAvailableEventsByCafeID(cafeID int) ([]*domain.Event, e
 	return ee, nil
 }
 
-func (r *reservation) GetSuitableTables(cafeID, partySize, locationID int, date, minPossibleBookingTime, maxPossibleBookingTime string) ([]*domain.Table, error) {
+func (r *reservation) GetSuitableTables(cafeID, partySize, locationID int, date, minPossibleBookingTime, maxPossibleBookingTime string) ([]domain.Table, error) {
 	query := `	select id, capacity, location_id
 				from tables
 				where cafe_id = $1
@@ -87,15 +123,18 @@ func (r *reservation) GetSuitableTables(cafeID, partySize, locationID int, date,
 	}
 	defer rows.Close()
 
-	var tt []*domain.Table
+	var tt []domain.Table
 
 	for rows.Next() {
-		t := domain.NewTable()
+		t := tablesPool.Get().(*domain.Table)
 		err = rows.Scan(&t.ID, &t.Capacity, &t.Location.ID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to assign values to table struct from row %v", err)
 		}
-		tt = append(tt, t)
+		tt = append(tt, *t)
+
+		*t = domain.Table{}
+		tablesPool.Put(t)
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err
@@ -139,7 +178,7 @@ func newNullString(s string) sql.NullString {
 	}
 }
 
-func (r *reservation) GetUserReservations(userID int) ([]*domain.Reservation, error) {
+func (r *reservation) GetUserReservations(userID int) ([]domain.Reservation, error) {
 	query := `SELECT r.id, r.cafe_id, c.name, r.table_id,
 			t.location_id, l.name, r.event_id, e.name, r.num_of_persons, r.date
 			from reservations r
@@ -155,16 +194,19 @@ func (r *reservation) GetUserReservations(userID int) ([]*domain.Reservation, er
 	}
 	defer rows.Close()
 
-	var rr []*domain.Reservation
+	var rr []domain.Reservation
 
 	for rows.Next() {
-		r := domain.NewReservation()
+		r := reservationsPool.Get().(*domain.Reservation)
 		err = rows.Scan(&r.ID, &r.Cafe.ID, &r.Cafe.Name, &r.Table.ID, &r.Table.Location.ID,
 			&r.Table.Location.Name, &r.Event.ID, &r.Event.Name, &r.PartySize, &r.Date)
 		if err != nil {
 			return nil, fmt.Errorf("failed to assign values to Reservation struct from row: %v", err)
 		}
-		rr = append(rr, r)
+		rr = append(rr, *r)
+
+		*r = domain.Reservation{}
+		reservationsPool.Put(r)
 	}
 	if err = rows.Err(); err != nil {
 		return nil, err

@@ -30,31 +30,30 @@ type reservation struct {
 }
 
 type ReservationRepo interface {
-	GetSuitableTables(cafeID, partySize, locationID int, date, minPossibleBookingTime, maxPossibleBookingTime string) ([]*domain.Table, error)
-	GetAvailableLocationsByCafeID(cafeID int) ([]*domain.Location, error)
-	GetAvailableEventsByCafeID(cafeID int) ([]*domain.Event, error)
+	GetSuitableTables(cafeID, partySize, locationID int, date, minPossibleBookingTime, maxPossibleBookingTime string) ([]domain.Table, error)
+	GetAvailableLocationsByCafeID(cafeID int) ([]domain.Location, error)
+	GetAvailableEventsByCafeID(cafeID int) ([]domain.Event, error)
 	BookTable(reservation *domain.Reservation) error
-	GetUserReservations(userID int) ([]*domain.Reservation, error)
+	GetUserReservations(userID int) ([]domain.Reservation, error)
 }
 
 func NewReservation(repo ReservationRepo) *reservation {
 	return &reservation{repo: repo}
 }
 
-func (r *reservation) GetLocationsByCafeID(cafeID int) ([]*domain.Location, error) {
+func (r *reservation) GetLocationsByCafeID(cafeID int) ([]domain.Location, error) {
 	return r.repo.GetAvailableLocationsByCafeID(cafeID)
 }
 
-func (r *reservation) GetEventsByCafeID(cafeID int) ([]*domain.Event, error) {
+func (r *reservation) GetEventsByCafeID(cafeID int) ([]domain.Event, error) {
 	return r.repo.GetAvailableEventsByCafeID(cafeID)
 }
 
-func (r *reservation) GetAvailableTables(cafeID, partySize, locationID int, date, bookTime string) ([]*domain.Table, error) {
+func (r *reservation) GetAvailableTables(cafeID, partySize, locationID int, date, bookTime string) ([]domain.Table, error) {
 	tempTime, _ := time.Parse("15:04", bookTime)
-
 	// postgres between operation is inclusive for greater value, therefore we need to extract to fit in range
-	tempMaxPossibleBookingTime := tempTime.Add(reservationInterval - 1*time.Minute)
-	tempMinPossibleBookingTime := tempTime.Add(-reservationInterval * time.Minute)
+	tempMaxPossibleBookingTime := tempTime.Add((reservationInterval - 1) * time.Minute)
+	tempMinPossibleBookingTime := tempTime.Add(-(reservationInterval - 1) * time.Minute)
 
 	maxPossibleBookingTime :=
 		strconv.Itoa(tempMaxPossibleBookingTime.Hour()) + ":" + strconv.Itoa(tempMaxPossibleBookingTime.Minute())
@@ -128,22 +127,22 @@ func (r *reservation) BookTable(form *forms.FormValidator, userChoice http_v1.Us
 	return reservation.ID, nil, nil
 }
 
-func (r *reservation) GetUserBookings(userID int) ([]*domain.Reservation, error) {
+func (r *reservation) GetUserBookings(userID int) ([]domain.Reservation, error) {
 	rr, err := r.repo.GetUserReservations(userID)
 	if err != nil {
 		return nil, err
 	}
 
 	now := time.Now()
-	for _, r := range rr {
+	for idx, r := range rr {
 		if r.Date.Year() == now.Year() &&
 			int(r.Date.Month()) == int(now.Month()) &&
 			r.Date.Day() == now.Day() {
-
 			if r.Date.Hour() > now.Hour() {
-				r.IsActive = true
-				r.HoursUntilReservation = r.Date.Hour() - now.Hour()
-				r.MinutesUntilReservation = r.Date.Minute() - now.Minute()
+				// using rr[idx] because we have slice of values, not pointers
+				rr[idx].IsActive = true
+				rr[idx].HoursUntilReservation = r.Date.Hour() - now.Hour()
+				rr[idx].MinutesUntilReservation = r.Date.Minute() - now.Minute()
 			}
 		}
 	}
