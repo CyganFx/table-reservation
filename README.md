@@ -3,12 +3,9 @@
 ## Prerequisites
 Create .env file in root directory and add following values:
 ```dotenv
-POSTGRES_URI=postgres://<username>:<password>@127.0.0.1:5432/<db_name>
+POSTGRES_PASSWORD=<password>
 SESSION_SECRET=<any string>
-AWS_REGION=<write me in dm to get it>
-AWS_ACCESS_KEY_ID=<write me in dm to get it>
-AWS_SECRET_ACCESS_KEY=<write me in dm to get it>
-BUCKET_NAME=<write me in dm to get it>
+AWS_SECRET_ACCESS_KEY=<confidential>
 ```
 This bucket is public, you should be able to access it
 

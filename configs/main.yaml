@@ -1,0 +1,17 @@
+web:
+  host: "127.0.0.1"
+  port: "8000"
+
+postgres:
+  host: "127.0.0.1"
+  port: "5432"
+  username: "postgres"
+  dbName: "table_reservation"
+
+fileStorage:
+  bucketName: "ez-booking-bucket"
+  awsRegion: "eu-north-1"
+  aws_access_key: "AKIAULNNH4ARJJVXJXVI"
+
+
+
