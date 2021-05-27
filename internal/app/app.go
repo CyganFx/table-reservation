@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"github.com/CyganFx/table-reservation/internal/app/config"
 	"github.com/CyganFx/table-reservation/internal/delivery/http-v1"
 	"github.com/CyganFx/table-reservation/internal/repository/postgres"
@@ -9,7 +10,11 @@ import (
 	"github.com/CyganFx/table-reservation/pkg/rest-errors"
 	"github.com/joho/godotenv"
 	"log"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func init() {
@@ -45,9 +50,42 @@ func Run(configsDir, templatesDir string) {
 	restErrorsResponser := rest_errors.NewHttpResponser(errorLog)
 	handler := http_v1.NewHandler(userService, reservationService, restErrorsResponser, infoLog, templateCache)
 
-	srv := new(config.Server)
-	infoLog.Printf("main: API listening on host %s and port %s", cfg.Web.APIHost, cfg.Web.APIPort)
-	if err := srv.Run(cfg, handler.Init(*cfg), errorLog); err != nil {
-		errorLog.Fatal(err)
+	//Server
+	srv := &http.Server{
+		Addr:         ":" + cfg.Web.APIPort,
+		ErrorLog:     errorLog,
+		Handler:      handler.Init(*cfg),
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
+	serverErrors := make(chan error, 1)
+
+	// Run Server
+	go func() {
+		infoLog.Printf("main: API listening on host %s and port %s", cfg.Web.APIHost, cfg.Web.APIPort)
+		serverErrors <- srv.ListenAndServe()
+	}()
+
+	// Graceful Shutdown
+	select {
+	case err := <-serverErrors:
+		errorLog.Fatalf("server error: %v", err)
+	case sig := <-shutdown:
+		infoLog.Printf("main: %v: Start shutdown", sig)
+
+		// Give outstanding requests a deadline for completion.
+		ctx, cancel := context.WithTimeout(context.Background(), cfg.Web.ShutdownTimeout)
+		defer cancel()
+
+		// Asking listener to shutdown and shed load.
+		if err := srv.Shutdown(ctx); err != nil {
+			errorLog.Fatalf("could not stop server gracefully: %v", err)
+		}
+
+		infoLog.Printf("main: %v: Completed shutdown", sig)
 	}
 }
