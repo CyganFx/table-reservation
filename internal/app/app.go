@@ -73,7 +73,7 @@ func Run(configsDir, templatesDir string) {
 
 	//Notificator
 	go func() {
-		ticker := time.NewTicker(10 * time.Second)
+		ticker := time.NewTicker(time.Minute)
 		for range ticker.C {
 			err := reservationService.CheckNotifyDate(time.Now(), notifier)
 			if err != nil {
