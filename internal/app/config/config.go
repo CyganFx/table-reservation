@@ -41,6 +41,13 @@ type Config struct {
 		AwsRegion       string `yaml:"awsRegion"`
 		SecretAccessKey string
 	} `yaml:"fileStorage"`
+
+	SMTP struct {
+		Host string `conf:"default:smtp.gmail.com" yaml:"host"`
+		Port int    `conf:"default:587" yaml:"port"`
+		From string `conf:"default:duman070601@gmail.com" yaml:"from"`
+		Pass string
+	}
 }
 
 func Init(cfg *Config, configsDir string) error {
@@ -69,6 +76,15 @@ func Init(cfg *Config, configsDir string) error {
 
 	setEnvVariables(cfg)
 
+	content, err := ioutil.ReadFile(configsDir)
+	if err != nil {
+		return errors.Wrap(err, "reading file")
+	}
+
+	if err = yaml.Unmarshal(content, cfg); err != nil {
+		return errors.Wrap(err, "unmarshalling config")
+	}
+
 	// App Starting
 	expvar.NewString("build").Set(build)
 	log.Printf("main: Started: Application initializing: version %q", build)
@@ -79,19 +95,11 @@ func Init(cfg *Config, configsDir string) error {
 	}
 	log.Printf("main: Config:\n%v\n", out)
 
-	content, err := ioutil.ReadFile(configsDir)
-	if err != nil {
-		return errors.Wrap(err, "reading file")
-	}
-
-	if err = yaml.Unmarshal(content, cfg); err != nil {
-		return errors.Wrap(err, "unmarshalling config")
-	}
-
 	return nil
 }
 
 func setEnvVariables(cfg *Config) {
 	cfg.Database.Password = os.Getenv("POSTGRES_PASSWORD")
 	cfg.FileStorage.SecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
+	cfg.SMTP.Pass = os.Getenv("GMAIL_PASSWORD")
 }

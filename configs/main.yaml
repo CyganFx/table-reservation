@@ -13,5 +13,8 @@ fileStorage:
   awsRegion: "eu-north-1"
   aws_access_key: "AKIAULNNH4ARJJVXJXVI"
 
-
+smtp:
+  host: "smtp.gmail.com"
+  port: 587
+  from: "duman070601@gmail.com"
 

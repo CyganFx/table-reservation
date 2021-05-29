@@ -19,9 +19,8 @@ const (
 	maxTableCapacity             = 8 //assume that max table size is 8 for all restaurants
 	bookTimeSelectInterval       = 15
 
-	dateLayout = "2006-01-02"
-	timeLayout = "15:04:05"
-
+	dateLayout          = "2006-01-02"
+	timeLayout          = "15:04:05"
 	minutesBeforeNotify = 60
 )
 
@@ -35,6 +34,7 @@ type ReservationRepo interface {
 	GetAvailableEventsByCafeID(cafeID int) ([]domain.Event, error)
 	BookTable(reservation *domain.Reservation) error
 	GetUserReservations(userID int) ([]domain.Reservation, error)
+	GetReservationsByNotifyDate(now time.Time) ([]domain.Reservation, error)
 }
 
 func NewReservation(repo ReservationRepo) *reservation {
@@ -262,5 +262,28 @@ func (r *reservation) setEventSelector(data *http_v1.ReservationData, cafeID int
 	if err != nil {
 		return fmt.Errorf("trouble getting events %v", err)
 	}
+	return nil
+}
+
+func (r *reservation) CheckNotifyDate(now time.Time, notificator http_v1.NotificatorService) error {
+	nowNoSeconds := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, time.UTC)
+	fmt.Println(nowNoSeconds)
+	reservations, err := r.repo.GetReservationsByNotifyDate(nowNoSeconds)
+	if err != nil {
+		return errors.Wrap(err, "getting emails")
+	}
+	fmt.Println("i am after sql")
+	if len(reservations) == 0 {
+		fmt.Println("length is 0")
+		return nil
+	}
+	for _, v := range reservations {
+		fmt.Println("Data: ", v)
+	}
+
+	if err = notificator.UsersBooking(reservations); err != nil {
+		return err
+	}
+
 	return nil
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func (h *handler) initReservationRoutes(api *gin.RouterGroup) {
@@ -29,6 +30,12 @@ type ReservationService interface {
 	BookTable(form *forms.FormValidator, userChoice UserChoice, userID interface{}) (int, *forms.FormValidator, error)
 	GetUserBookings(userID int) ([]domain.Reservation, error)
 	SetDefaultReservationData(data *ReservationData, cafeID int) error
+
+	CheckNotifyDate(now time.Time, notificator NotificatorService) error //handler not using
+}
+
+type NotificatorService interface {
+	UsersBooking(data []domain.Reservation) error
 }
 
 type ReservationData struct {

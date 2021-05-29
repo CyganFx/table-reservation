@@ -7,6 +7,7 @@ import (
 	"github.com/CyganFx/table-reservation/internal/repository/postgres"
 	"github.com/CyganFx/table-reservation/internal/service"
 	"github.com/CyganFx/table-reservation/pkg/cache"
+	"github.com/CyganFx/table-reservation/pkg/notificator"
 	"github.com/CyganFx/table-reservation/pkg/rest-errors"
 	"github.com/joho/godotenv"
 	"log"
@@ -46,6 +47,7 @@ func Run(configsDir, templatesDir string) {
 	reservationRepo := postgres.NewReservation(dbPool)
 	userService := service.NewUser(userRepo)
 	reservationService := service.NewReservation(reservationRepo)
+	notifier := notificator.New(cfg)
 	restErrorsResponser := rest_errors.NewHttpResponser(errorLog)
 	handler := http_v1.NewHandler(userService, reservationService, restErrorsResponser, infoLog, templateCache)
 
@@ -67,6 +69,17 @@ func Run(configsDir, templatesDir string) {
 	go func() {
 		infoLog.Printf("main: API listening on host %s and port %s", cfg.Web.APIHost, cfg.Web.APIPort)
 		serverErrors <- srv.ListenAndServe()
+	}()
+
+	//Notificator
+	go func() {
+		ticker := time.NewTicker(10 * time.Second)
+		for range ticker.C {
+			err := reservationService.CheckNotifyDate(time.Now(), notifier)
+			if err != nil {
+				errorLog.Printf("main: %v", err)
+			}
+		}
 	}()
 
 	// Graceful Shutdown

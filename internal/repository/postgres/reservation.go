@@ -7,6 +7,7 @@ import (
 	"github.com/CyganFx/table-reservation/internal/domain"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"sync"
+	"time"
 )
 
 //in order to make slices with initial capacity to increase performance
@@ -200,6 +201,43 @@ func (r *reservation) GetUserReservations(userID int) ([]domain.Reservation, err
 		r := reservationsPool.Get().(*domain.Reservation)
 		err = rows.Scan(&r.ID, &r.Cafe.ID, &r.Cafe.Name, &r.Table.ID, &r.Table.Location.ID,
 			&r.Table.Location.Name, &r.Event.ID, &r.Event.Name, &r.PartySize, &r.Date)
+		if err != nil {
+			return nil, fmt.Errorf("failed to assign values to Reservation struct from row: %v", err)
+		}
+		rr = append(rr, *r)
+
+		*r = domain.Reservation{}
+		reservationsPool.Put(r)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return rr, nil
+}
+
+func (r *reservation) GetReservationsByNotifyDate(now time.Time) ([]domain.Reservation, error) {
+	query := `SELECT r.id, r.cafe_id, c.name, r.table_id,
+			t.location_id, l.name, r.event_id, e.name, r.num_of_persons, r.date, r.cust_name, r.cust_email, r.notify_date
+			from reservations r
+			join cafes c on r.cafe_id = c.id
+			join tables t on r.table_id = t.id
+			join locations l on t.location_id = l.id
+			join events e on r.event_id = e.id
+			WHERE r.notify_date = $1;`
+
+	rows, err := r.db.Query(context.Background(), query, now)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var rr []domain.Reservation
+
+	for rows.Next() {
+		r := reservationsPool.Get().(*domain.Reservation)
+		err = rows.Scan(&r.ID, &r.Cafe.ID, &r.Cafe.Name, &r.Table.ID, &r.Table.Location.ID,
+			&r.Table.Location.Name, &r.Event.ID, &r.Event.Name, &r.PartySize, &r.Date, &r.CustName, &r.CustEmail, &r.NotifyDate)
 		if err != nil {
 			return nil, fmt.Errorf("failed to assign values to Reservation struct from row: %v", err)
 		}
