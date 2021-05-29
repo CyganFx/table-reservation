@@ -1,27 +1,29 @@
 package config
 
 import (
+	"expvar"
+	"fmt"
+	"github.com/ardanlabs/conf"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"log"
+	_ "net/http/pprof"
 	"os"
 	"time"
 )
 
-const (
-	httpReadTimeout  = 5 * time.Second
-	httpWriteTimeout = 10 * time.Second
-	httpIdleTimeout  = time.Minute
-	shutdownTimeout  = 5 * time.Second
-)
+var build = "develop"
 
 type Config struct {
+	conf.Version
 	Web struct {
-		APIHost         string `yaml:"host"`
-		APIPort         string `yaml:"port"`
-		ReadTimeout     time.Duration
-		WriteTimeout    time.Duration
-		IdleTimeout     time.Duration
-		ShutdownTimeout time.Duration
+		APIHost         string        `conf:"default:127.0.0.1" yaml:"host"`
+		APIPort         string        `conf:"default:4000" yaml:"port"`
+		ReadTimeout     time.Duration `conf:"default:5s"`
+		WriteTimeout    time.Duration `conf:"default:10s"`
+		IdleTimeout     time.Duration `conf:"default:5s"`
+		ShutdownTimeout time.Duration `conf:"default:5s"`
 	} `yaml:"web"`
 
 	Database struct {
@@ -41,27 +43,55 @@ type Config struct {
 	} `yaml:"fileStorage"`
 }
 
-func Init(configsDir string) (*Config, error) {
-	var cfg Config
+func Init(cfg *Config, configsDir string) error {
+	cfg.Version.SVN = build
+	cfg.Version.Desc = "copyright information here"
+
+	if err := conf.Parse(os.Args[1:], "BOOKING", cfg); err != nil {
+		switch err {
+		case conf.ErrHelpWanted:
+			usage, err := conf.Usage("BOOKING", cfg)
+			if err != nil {
+				return errors.Wrap(err, "generating config usage")
+			}
+			fmt.Println(usage)
+			return nil
+		case conf.ErrVersionWanted:
+			version, err := conf.VersionString("BOOKING", cfg)
+			if err != nil {
+				return errors.Wrap(err, "generating config version")
+			}
+			fmt.Println(version)
+			return nil
+		}
+		return errors.Wrap(err, "parsing config")
+	}
+
+	setEnvVariables(cfg)
+
+	// App Starting
+	expvar.NewString("build").Set(build)
+	log.Printf("main: Started: Application initializing: version %q", build)
+
+	out, err := conf.String(cfg)
+	if err != nil {
+		return errors.Wrap(err, "generating config for output")
+	}
+	log.Printf("main: Config:\n%v\n", out)
+
 	content, err := ioutil.ReadFile(configsDir)
 	if err != nil {
-		return nil, err
+		return errors.Wrap(err, "reading file")
 	}
 
-	if err = yaml.Unmarshal(content, &cfg); err != nil {
-		return nil, err
+	if err = yaml.Unmarshal(content, cfg); err != nil {
+		return errors.Wrap(err, "unmarshalling config")
 	}
 
-	setDefaultsAndEnv(&cfg)
-
-	return &cfg, nil
+	return nil
 }
 
-func setDefaultsAndEnv(cfg *Config) {
-	cfg.Web.ReadTimeout = httpReadTimeout
-	cfg.Web.WriteTimeout = httpWriteTimeout
-	cfg.Web.IdleTimeout = httpIdleTimeout
-	cfg.Web.ShutdownTimeout = shutdownTimeout
+func setEnvVariables(cfg *Config) {
 	cfg.Database.Password = os.Getenv("POSTGRES_PASSWORD")
 	cfg.FileStorage.SecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
 }

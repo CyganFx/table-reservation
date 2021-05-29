@@ -17,27 +17,26 @@ import (
 	"time"
 )
 
-func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("Error loading .env file: %v", err.Error())
-	}
-}
-
 // Run initializes whole application
 func Run(configsDir, templatesDir string) {
-	cfg, err := config.Init(configsDir)
-	if err != nil {
-		log.Fatalf("Error loading initializing configs: %v", err.Error())
-	}
-
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime)
+
+	if err := godotenv.Load(); err != nil {
+		errorLog.Fatalf("Error loading .env file: %v", err.Error())
+	}
+
+	var cfg config.Config
+	err := config.Init(&cfg, configsDir)
+	if err != nil {
+		errorLog.Fatalf("Error loading initializing configs: %v", err.Error())
+	}
 
 	templateCache, err := cache.NewTemplate(templatesDir)
 	if err != nil {
 		errorLog.Fatal(err)
 	}
-	dbPool, err := postgres.InitPool(*cfg)
+	dbPool, err := postgres.InitPool(cfg)
 	if err != nil {
 		errorLog.Fatal(err)
 	}
@@ -54,7 +53,7 @@ func Run(configsDir, templatesDir string) {
 	srv := &http.Server{
 		Addr:         ":" + cfg.Web.APIPort,
 		ErrorLog:     errorLog,
-		Handler:      handler.Init(*cfg),
+		Handler:      handler.Init(cfg),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -83,6 +82,7 @@ func Run(configsDir, templatesDir string) {
 
 		// Asking listener to shutdown and shed load.
 		if err := srv.Shutdown(ctx); err != nil {
+			srv.Close()
 			errorLog.Fatalf("could not stop server gracefully: %v", err)
 		}
 

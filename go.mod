@@ -3,6 +3,7 @@ module github.com/CyganFx/table-reservation
 go 1.15
 
 require (
+	github.com/ardanlabs/conf v1.4.0
 	github.com/aws/aws-sdk-go v1.38.40
 	github.com/gin-contrib/sessions v0.0.3
 	github.com/gin-gonic/gin v1.6.3
