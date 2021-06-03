@@ -19,17 +19,6 @@ var (
 	fileStorageEndPoint     = "https://ez-booking-bucket.s3-eu-north-1.amazonaws.com/"
 )
 
-type UserService interface {
-	Save(form *forms.FormValidator) (bool, error)
-	SignIn(email, password string) (int, error)
-	FindById(id int) (*domain.User, error)
-	Update(user *domain.User) error
-	UpdateImage(filePath string, userID int) error
-	UploadImageToAWSBucket(awsSession *aws_session.Session, MyBucket, filename string, file multipart.File) error
-	DeleteImageFromAWSBucket(awsSession *aws_session.Session, imageURL, myBucket, objectsLocationURL string, infoLog *log.Logger) error
-	SetConfirmData(ctx *gin.Context, reservationData *ReservationData, tableID, eventID int, eventDescription string) (*forms.FormValidator, error)
-}
-
 func (h *handler) initUserRoutes(api *gin.RouterGroup) {
 	users := api.Group("/users")
 	{
@@ -48,8 +37,15 @@ func (h *handler) initUserRoutes(api *gin.RouterGroup) {
 	}
 }
 
-func (h *handler) MainPage(c *gin.Context) {
-	h.render(c, "main.page.html", &templateData{})
+type UserService interface {
+	Save(form *forms.FormValidator) (bool, error)
+	SignIn(email, password string) (int, error)
+	FindById(id int) (*domain.User, error)
+	Update(user *domain.User) error
+	UpdateImage(filePath string, userID int) error
+	UploadImageToAWSBucket(awsSession *aws_session.Session, MyBucket, filename string, file multipart.File) error
+	DeleteImageFromAWSBucket(awsSession *aws_session.Session, imageURL, myBucket, objectsLocationURL string, infoLog *log.Logger) error
+	SetConfirmData(ctx *gin.Context, reservationData *ReservationData, tableID, eventID int, eventDescription string) (*forms.FormValidator, error)
 }
 
 func (h *handler) ProfilePage(c *gin.Context) {
@@ -71,6 +67,9 @@ func (h *handler) ProfilePage(c *gin.Context) {
 	}
 
 	bookings, err := h.reservationService.GetUserBookings(id)
+	for _, v := range bookings {
+		fmt.Println(v)
+	}
 	if err != nil {
 		h.errors.ServerError(c, err)
 		return

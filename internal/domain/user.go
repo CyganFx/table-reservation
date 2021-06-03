@@ -12,6 +12,15 @@ var (
 	ErrDuplicateEmail     = errors.New("domain: duplicate email")
 )
 
+type UserHandler interface {
+	SignUp(c *gin.Context)
+	Login(c *gin.Context)
+	Logout(c *gin.Context)
+	ProfilePage(c *gin.Context)
+	UpdateImage(c *gin.Context)
+	Update(c *gin.Context)
+}
+
 type User struct {
 	ID       int       `json:"id"`
 	Name     string    `json:"username"`
@@ -30,14 +39,4 @@ func NewUser() *User {
 type Role struct {
 	ID   int
 	Name string
-}
-
-type UserHandler interface {
-	SignUp(c *gin.Context)
-	Login(c *gin.Context)
-	Logout(c *gin.Context)
-	ProfilePage(c *gin.Context)
-	UpdateImage(c *gin.Context)
-	Update(c *gin.Context)
-	Init() *gin.Engine
 }

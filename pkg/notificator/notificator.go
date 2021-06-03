@@ -30,7 +30,6 @@ func New(cfg config.Config) *notificator {
 	}
 }
 
-// TODO add cafe address and phone, Test
 func (n *notificator) UsersBooking(reservations []domain.Reservation) error {
 	m := gomail.NewMessage()
 	// Settings for SMTP server
@@ -65,7 +64,6 @@ func (n *notificator) UsersBooking(reservations []domain.Reservation) error {
 			data.Cafe.Name, data.Date.Sub(data.NotifyDate).Minutes()))
 
 		fmt.Println("Message: ", m)
-
 		if err := d.DialAndSend(m); err != nil {
 			return errors.Wrap(err, "sending email")
 		}

@@ -28,16 +28,16 @@ type user struct {
 	repo UserRepo
 }
 
+func NewUser(repo UserRepo) *user {
+	return &user{repo: repo}
+}
+
 type UserRepo interface {
 	Create(name, email, mobile, hashedPassword string, roleId int) error
 	GetById(id int) (*domain.User, error)
 	Update(user *domain.User) error
 	Authenticate(email, password string) (int, error)
 	SetProfileImage(filePath string, userID int) error
-}
-
-func NewUser(repo UserRepo) *user {
-	return &user{repo: repo}
 }
 
 func (u *user) Save(form *forms.FormValidator) (bool, error) {

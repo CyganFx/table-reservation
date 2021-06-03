@@ -28,6 +28,10 @@ type reservation struct {
 	repo ReservationRepo
 }
 
+func NewReservation(repo ReservationRepo) *reservation {
+	return &reservation{repo: repo}
+}
+
 type ReservationRepo interface {
 	GetSuitableTables(cafeID, partySize, locationID int, date, minPossibleBookingTime, maxPossibleBookingTime string) ([]domain.Table, error)
 	GetAvailableLocationsByCafeID(cafeID int) ([]domain.Location, error)
@@ -35,10 +39,6 @@ type ReservationRepo interface {
 	BookTable(reservation *domain.Reservation) error
 	GetUserReservations(userID int) ([]domain.Reservation, error)
 	GetReservationsByNotifyDate(now time.Time) ([]domain.Reservation, error)
-}
-
-func NewReservation(repo ReservationRepo) *reservation {
-	return &reservation{repo: repo}
 }
 
 func (r *reservation) GetLocationsByCafeID(cafeID int) ([]domain.Location, error) {
@@ -267,18 +267,12 @@ func (r *reservation) setEventSelector(data *http_v1.ReservationData, cafeID int
 
 func (r *reservation) CheckNotifyDate(now time.Time, notificator http_v1.NotificatorService) error {
 	nowNoSeconds := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, time.UTC)
-	fmt.Println(nowNoSeconds)
 	reservations, err := r.repo.GetReservationsByNotifyDate(nowNoSeconds)
 	if err != nil {
 		return errors.Wrap(err, "getting emails")
 	}
-	fmt.Println("i am after sql")
 	if len(reservations) == 0 {
-		fmt.Println("length is 0")
 		return nil
-	}
-	for _, v := range reservations {
-		fmt.Println("Data: ", v)
 	}
 
 	if err = notificator.UsersBooking(reservations); err != nil {

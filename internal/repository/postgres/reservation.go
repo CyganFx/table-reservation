@@ -2,41 +2,10 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"github.com/CyganFx/table-reservation/internal/domain"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"sync"
 	"time"
-)
-
-//in order to make slices with initial capacity to increase performance
-const (
-	maxNumOfLocations = 10
-	maxNumOfEvents    = 10
-)
-
-var (
-	tablesPool = sync.Pool{
-		New: func() interface{} {
-			return domain.NewTable()
-		},
-	}
-	eventsPool = sync.Pool{
-		New: func() interface{} {
-			return &domain.Event{}
-		},
-	}
-	locationsPool = sync.Pool{
-		New: func() interface{} {
-			return &domain.Location{}
-		},
-	}
-	reservationsPool = sync.Pool{
-		New: func() interface{} {
-			return domain.NewReservation()
-		},
-	}
 )
 
 type reservation struct {
@@ -56,7 +25,7 @@ func (r *reservation) GetAvailableLocationsByCafeID(cafeID int) ([]domain.Locati
 	}
 	defer rows.Close()
 
-	ll := make([]domain.Location, 0, maxNumOfLocations)
+	var ll []domain.Location
 
 	for rows.Next() {
 		l := locationsPool.Get().(*domain.Location)
@@ -85,7 +54,7 @@ func (r *reservation) GetAvailableEventsByCafeID(cafeID int) ([]domain.Event, er
 	}
 	defer rows.Close()
 
-	ee := make([]domain.Event, 0, maxNumOfEvents)
+	var ee []domain.Event
 
 	for rows.Next() {
 		e := eventsPool.Get().(*domain.Event)
@@ -159,34 +128,14 @@ func (r *reservation) BookTable(reservation *domain.Reservation) error {
 	return nil
 }
 
-func newNullInt(n int32) sql.NullInt32 {
-	if n == -1 {
-		return sql.NullInt32{}
-	}
-	return sql.NullInt32{
-		Int32: n,
-		Valid: true,
-	}
-}
-
-func newNullString(s string) sql.NullString {
-	if s == "" {
-		return sql.NullString{}
-	}
-	return sql.NullString{
-		String: s,
-		Valid:  true,
-	}
-}
-
 func (r *reservation) GetUserReservations(userID int) ([]domain.Reservation, error) {
-	query := `SELECT r.id, r.cafe_id, c.name, r.table_id,
+	query := `SELECT DISTINCT r.id, r.cafe_id, c.name, r.table_id,
 			t.location_id, l.name, r.event_id, e.name, r.num_of_persons, r.date
 			from reservations r
-			join cafes c on r.cafe_id = c.id
-			join tables t on r.table_id = t.id
-			join locations l on t.location_id = l.id
-			join events e on r.event_id = e.id
+			left join cafes c on r.cafe_id = c.id
+			left join tables t on r.table_id = t.id
+			left join locations l on t.location_id = l.id
+			left join events e on r.event_id = e.id
 			WHERE r.user_id = $1;`
 
 	rows, err := r.db.Query(context.Background(), query, userID)

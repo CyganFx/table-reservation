@@ -60,18 +60,3 @@ type Table struct {
 func NewTable() *Table {
 	return &Table{}
 }
-
-type Location struct {
-	ID   int
-	Name string
-}
-
-type Event struct {
-	ID   int
-	Name string
-}
-
-type Cafe struct {
-	ID   int
-	Name string
-}

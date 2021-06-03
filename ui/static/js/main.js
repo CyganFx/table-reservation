@@ -4,6 +4,39 @@ const navLink = document.querySelectorAll('.nav__link')
 /*==================== SCROLL SECTIONS ACTIVE LINK ====================*/
 const sections = document.querySelectorAll('section[id]')
 
+var tableTypesCounter = 0
+
+function AddTablesField() {
+    let tables = document.getElementById("tablesDiv")
+    let div = document.createElement('div');
+    div.className = 'form-inline';
+    div.innerHTML = `
+            <div class="form-group mb-2">
+                <label>Locations</label>
+                <select class="form-control" name="location${tableTypesCounter}">                               
+                      <option value="1">Default</option>                              
+                      <option value="2">Sofa</option>                              
+                      <option value="3">Outside</option>                              
+                      <option value="4">Bar</option>                              
+                      <option value="5">Window</option>                              
+                 </select>     
+            </div>      
+            <div class="form-group mb-2">
+                <label>Number of Tables</label>
+                <input class="form-control" type="number" name="number${tableTypesCounter}">
+            </div>
+            <div class="form-group mb-2">
+                <label>Capacity of Tables</label>
+                <input class="form-control" type="number" name="capacity${tableTypesCounter}">
+            </div>
+            
+  `
+    tables.appendChild(div);
+    tableTypesCounter++
+    document.getElementById("tableTypesCounter").value = tableTypesCounter
+}
+
+
 function scrollActive() {
     const scrollY = window.pageYOffset
 
@@ -86,3 +119,5 @@ sr.reveal(`.home__data, .home__img,
             .footer__content`, {
     interval: 200
 })
+
+

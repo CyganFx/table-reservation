@@ -45,11 +45,13 @@ func Run(configsDir, templatesDir string) {
 
 	userRepo := postgres.NewUser(dbPool)
 	reservationRepo := postgres.NewReservation(dbPool)
+	cafeRepo := postgres.NewCafe(dbPool)
 	userService := service.NewUser(userRepo)
 	reservationService := service.NewReservation(reservationRepo)
+	cafeService := service.NewCafe(cafeRepo)
 	notifier := notificator.New(cfg)
 	restErrorsResponser := rest_errors.NewHttpResponser(errorLog)
-	handler := http_v1.NewHandler(userService, reservationService, restErrorsResponser, infoLog, templateCache)
+	handler := http_v1.NewHandler(userService, reservationService, cafeService, restErrorsResponser, infoLog, templateCache)
 
 	//Server
 	srv := &http.Server{
@@ -73,7 +75,7 @@ func Run(configsDir, templatesDir string) {
 
 	//Notificator
 	go func() {
-		ticker := time.NewTicker(time.Minute)
+		ticker := time.NewTicker(20 * time.Second)
 		for range ticker.C {
 			err := reservationService.CheckNotifyDate(time.Now(), notifier)
 			if err != nil {

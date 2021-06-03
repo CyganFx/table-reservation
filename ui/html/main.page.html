@@ -34,6 +34,13 @@
             </div>
         </section>
 
+        <!--========== Cafes ==========-->
+        {{range .Cafes}}
+            <p>Name: {{.Name}}</p>
+            <p>Address: {{.Address}}</p>
+            <a href="/api/reservation/cafe/{{.ID}}">See</a>
+        {{end}}
+
         <!--========== SERVICES ==========-->
         <section class="services section bd-container" id="services">
             <span class="section-subtitle">Offering</span>

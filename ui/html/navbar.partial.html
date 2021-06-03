@@ -18,6 +18,8 @@
                     {{if .IsAuthenticated}}
                         <li class="nav__item"><a href="/api/users/profile/{{.User.ID}}" class="nav__link">Profile</a>
                         </li>
+                        <li class="nav__item"><a href="/api/cafe/collaborate" class="nav__link">Collaborate</a>
+                        </li>
                         {{/*                        {{if eq .User.Role.ID 1}}*/}}
                         {{/*                        {{end}}*/}}
                     {{end}}

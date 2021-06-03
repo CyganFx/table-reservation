@@ -1,0 +1,76 @@
+{{template "base-layout" .}}
+{{define "title"}} Collaborate {{end}}
+{{define "content"}}
+    <br><br><br>
+    <h1 class="mb-3 text-center" >Become part of us</h1>
+    <div class="d-flex justify-content-center">
+        {{with .CollaborateData}}
+            <form action="/api/cafe/collaborate" method="POST">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" class="form-control" name="name" placeholder="Name">
+                </div>
+                <div class="form-group">
+                    <label>City</label>
+                    <select class="form-control" name="city">
+                        {{range .Cities}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                        {{end}}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select class="form-control" name="type">
+                        {{range .Types}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                        {{end}}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Locations</label>
+                    {{range .Locations}}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="{{.ID}}" name="locations">
+                            <label class="form-check-label">{{.Name}}</label>
+                        </div>
+                    {{end}}
+                </div>
+                <div class="form-group">
+                    <label>Events</label>
+                    {{range .Events}}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="{{.ID}}" name="events">
+                            <label class="form-check-label">{{.Name}}</label>
+                        </div>
+                    {{end}}
+                </div>
+
+                <input type="hidden" id="tableTypesCounter" name="tableTypesCounter">
+
+                <div id="tablesDiv">
+                </div>
+
+                <button type="button" class="btn btn-info" onclick="AddTablesField()">Add Tables</button>
+
+                <div class="form-group">
+                    <label>Phone number</label>
+                    <input type="text" class="form-control" name="mobile" placeholder="+77772292347 / 87772292347">
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" class="form-control" name="address" placeholder="Qabanbay batyra 9/2">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" class="form-control" name="email" aria-describedby="emailHelp"
+                           placeholder="Enter email">
+                    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone
+                        else.</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        {{end}}
+    </div>
+    <br><br><br>
+{{end}}

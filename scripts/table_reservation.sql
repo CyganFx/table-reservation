@@ -46,18 +46,32 @@ insert into locations (name)
 values ('default'),
        ('sofa'),
        ('outside'),
-       ('bar');
+       ('bar'),
+       ('window');
 
 
 create table cafes
 (
-    id   serial       not null primary key,
-    name varchar(255) not null
+    id      serial       not null primary key,
+    name    varchar(255) not null,
+    city_id int          not null,
+    type_id int          not null,
+    address varchar(255) not null,
+    mobile  varchar(255) not null,
+    email   varchar(255) not null,
+    created timestamp    not null,
+    constraint cafes_fk_city_id
+        foreign key (city_id)
+            references cities (id),
+    constraint cafes_fk_type_id
+        foreign key (type_id)
+            references types (id)
 );
 
-insert into cafes (name)
-values ('tasty_food'),
-       ('random_cafe');
+insert into cafes(name, city_id, type_id, address, mobile, email, created)
+values ('tasty_food', 1, 1, 'Kenesary 69', '87772292347', 'duman_ishanov@mail.ru', now());
+
+
 
 create table tables
 (
@@ -146,3 +160,45 @@ VALUES (1, 1),
        (1, 2),
        (1, 3);
 
+
+create table types
+(
+    id   serial       not null primary key,
+    name varchar(255) not null
+);
+
+insert into types(name)
+values ('cafe'),
+       ('coffee-house'),
+       ('restaurant'),
+       ('bar'),
+       ('anti-cafe');
+
+
+create table cities
+(
+    id   serial       not null primary key,
+    name varchar(255) not null
+);
+
+insert into cities(name)
+values ('Nur-Sultan'),
+       ('Almaty'),
+       ('Shymkent');
+
+
+
+create table cafes_locations
+(
+    cafe_id     int not null,
+    location_id int not null,
+    constraint cafes_locations_fk_cafe_id foreign key (cafe_id) references cafes (id),
+    constraint cafes_locations_fk_event_id foreign key (location_id) references locations (id),
+    CONSTRAINT ck_cafe_id_location_id primary key (cafe_id, location_id)
+);
+
+insert into cafes_locations (cafe_id, location_id)
+VALUES (1, 1),
+       (1, 2),
+       (1, 3),
+       (1, 4);

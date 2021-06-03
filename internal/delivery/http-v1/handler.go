@@ -27,6 +27,7 @@ var (
 type handler struct {
 	userService        UserService
 	reservationService ReservationService
+	cafeService        CafeService
 	errors             Responser
 	infoLog            *log.Logger
 	templateCache      map[string]*template.Template
@@ -44,6 +45,8 @@ type Responser interface {
 type templateData struct {
 	User            *domain.User
 	ReservationData *ReservationData
+	CollaborateData *CollaborateData
+	Cafes           []domain.Cafe
 	Reservations    []domain.Reservation
 	Form            *forms.FormValidator
 	CurrentYear     int
@@ -51,11 +54,12 @@ type templateData struct {
 	IsAuthenticated bool
 }
 
-func NewHandler(userService UserService, reservationService ReservationService, errors Responser,
+func NewHandler(userService UserService, reservationService ReservationService, cafeService CafeService, errors Responser,
 	infoLog *log.Logger, templateCache map[string]*template.Template) *handler {
 	return &handler{
 		userService:        userService,
 		reservationService: reservationService,
+		cafeService:        cafeService,
 		errors:             errors,
 		infoLog:            infoLog,
 		templateCache:      templateCache,
@@ -82,6 +86,7 @@ func (h *handler) Init(cfg config.Config) *gin.Engine {
 	{
 		h.initUserRoutes(api)
 		h.initReservationRoutes(api)
+		h.initCafeRoutes(api)
 		h.initMenuRoutes(api)
 	}
 
