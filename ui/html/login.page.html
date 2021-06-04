@@ -9,6 +9,7 @@
 
     <section class="signup-page">
         <form action="/api/users/login" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
             {{with .Form}}
                 <div class="cont">
                     {{with .Errors.Get "generic"}}

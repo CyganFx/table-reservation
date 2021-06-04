@@ -7,6 +7,7 @@ require (
 	github.com/aws/aws-sdk-go v1.38.40
 	github.com/gin-contrib/sessions v0.0.3
 	github.com/gin-gonic/gin v1.6.3
+	github.com/gin-gonic/nosurf v0.0.0-20150415101651-45adcfcaf706
 	github.com/jackc/pgconn v1.8.0
 	github.com/jackc/pgx/v4 v4.10.1
 	github.com/joho/godotenv v1.3.0

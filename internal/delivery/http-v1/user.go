@@ -67,9 +67,7 @@ func (h *handler) ProfilePage(c *gin.Context) {
 	}
 
 	bookings, err := h.reservationService.GetUserBookings(id)
-	for _, v := range bookings {
-		fmt.Println(v)
-	}
+
 	if err != nil {
 		h.errors.ServerError(c, err)
 		return
@@ -151,7 +149,7 @@ func (h *handler) Login(c *gin.Context) {
 
 	if session.Get("redirectPathAfterLogin") == nil {
 		session.Save()
-		http.Redirect(c.Writer, c.Request, "/", http.StatusSeeOther)
+		h.MainPage(c)
 		return
 	}
 
@@ -166,7 +164,7 @@ func (h *handler) Logout(c *gin.Context) {
 	session.Delete("authenticatedUserID")
 	session.Set("flash", "You've been logged out successfully!")
 	session.Save()
-	http.Redirect(c.Writer, c.Request, "/", http.StatusSeeOther)
+	h.MainPage(c)
 }
 
 ////using AWS S3 to store profile images

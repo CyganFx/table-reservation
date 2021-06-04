@@ -6,6 +6,7 @@ import (
 	"github.com/CyganFx/table-reservation/internal/domain"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/nosurf"
 	"net/http"
 	"time"
 )
@@ -41,12 +42,17 @@ func (h *handler) RequireAuthentication() gin.HandlerFunc {
 	}
 }
 
+func csrfFailHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "%s\n", nosurf.Reason(r))
+}
+
 //front end middleware
 
 func (h *handler) addDefaultData(td *templateData, c *gin.Context) *templateData {
 	if td == nil {
 		td = &templateData{}
 	}
+	td.CSRFToken = nosurf.Token(c.Request)
 	td.CurrentYear = time.Now().Year()
 	session := sessions.Default(c)
 
@@ -73,8 +79,8 @@ func (h *handler) addDefaultData(td *templateData, c *gin.Context) *templateData
 	}
 
 	td.IsAuthenticated = isAuthenticated(c)
-
 	session.Save()
+
 	return td
 }
 

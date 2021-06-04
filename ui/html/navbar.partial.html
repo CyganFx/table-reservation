@@ -23,14 +23,13 @@
                         {{/*                        {{if eq .User.Role.ID 1}}*/}}
                         {{/*                        {{end}}*/}}
                     {{end}}
-                    <li class="nav__item"><a href="/api/reservation/cafe/1" class="nav__link">Reservation for cafe with
-                            id 1</a></li>
                     <li class="nav__item"><a href="#services" class="nav__link">Services</a></li>
                     <li class="nav__item"><a href="#footer" class="nav__link">Contact us</a></li>
                     {{if .IsAuthenticated}}
                         <li class="nav__item">
                             <form action='/api/users/logout' method='POST'>
-                                <button>Logout</button>
+                                <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+                                <button class="btn btn-light">Logout</button>
                             </form>
                         </li>
                     {{else}}

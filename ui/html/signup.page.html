@@ -8,6 +8,7 @@
 
     <section class="signup-page">
         <form action="/api/users/sign-up" method="POST" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
             {{with .Form}}
                 <div class="cont">
                     <div class="form sign-up">

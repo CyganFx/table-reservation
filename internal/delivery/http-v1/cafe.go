@@ -49,6 +49,7 @@ func (h *handler) MainPage(c *gin.Context) {
 }
 
 func (h *handler) CollaboratePage(c *gin.Context) {
+	fmt.Print("I am here!")
 	locations, err := h.cafeService.GetLocations()
 	if err != nil {
 		h.errors.ServerError(c, err)
@@ -132,6 +133,11 @@ func (h *handler) Collaborate(c *gin.Context) {
 			h.errors.ServerError(c, err)
 			return
 		}
+	}
+
+	if err := h.notificatorService.CollaborationNotify(*cafe); err != nil {
+		h.errors.ServerError(c, err)
+		return
 	}
 
 	session := sessions.Default(c)

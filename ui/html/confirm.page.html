@@ -6,6 +6,7 @@
         <h2>You are booking table {{.TableID}} at {{.Date}} {{.BookTime}} for {{.PartySize}} people</h2>
     {{end}}
     <form method="POST" action="/api/reservation/submit">
+        <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
         {{with .Form}}
             <div>
                 <label>Name: </label>

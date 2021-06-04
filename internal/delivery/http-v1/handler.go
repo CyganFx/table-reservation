@@ -10,8 +10,10 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/nosurf"
 	"html/template"
 	"log"
+	"net/http"
 	"os"
 )
 
@@ -28,6 +30,7 @@ type handler struct {
 	userService        UserService
 	reservationService ReservationService
 	cafeService        CafeService
+	notificatorService NotificatorService
 	errors             Responser
 	infoLog            *log.Logger
 	templateCache      map[string]*template.Template
@@ -43,6 +46,7 @@ type Responser interface {
 
 // Passing templateData in html pages at render
 type templateData struct {
+	CSRFToken       string
 	User            *domain.User
 	ReservationData *ReservationData
 	CollaborateData *CollaborateData
@@ -54,23 +58,35 @@ type templateData struct {
 	IsAuthenticated bool
 }
 
-func NewHandler(userService UserService, reservationService ReservationService, cafeService CafeService, errors Responser,
+func NewHandler(userService UserService, reservationService ReservationService, cafeService CafeService, notificatorService NotificatorService, errors Responser,
 	infoLog *log.Logger, templateCache map[string]*template.Template) *handler {
 	return &handler{
 		userService:        userService,
 		reservationService: reservationService,
 		cafeService:        cafeService,
+		notificatorService: notificatorService,
 		errors:             errors,
 		infoLog:            infoLog,
 		templateCache:      templateCache,
 	}
 }
 
-func (h *handler) Init(cfg config.Config) *gin.Engine {
+//Init set ups router and routes and wraps it in csrf middleware that checks for csrf token in every request
+func (h *handler) Init(cfg config.Config) http.Handler {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 
+	csrfHandler := nosurf.New(router)
+	csrfHandler.SetFailureHandler(http.HandlerFunc(csrfFailHandler))
+
 	sessionStore := cookie.NewStore([]byte(os.Getenv("SESSION_SECRET")))
+	sessionStore.Options(sessions.Options{
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   3600,
+	})
+
 	awsSession := connectAws(cfg)
 
 	router.Use(sessions.Sessions("mySessionStore", sessionStore),
@@ -92,7 +108,7 @@ func (h *handler) Init(cfg config.Config) *gin.Engine {
 
 	router.Static("/static/", StaticFilesDir)
 
-	return router
+	return csrfHandler
 }
 
 func connectAws(cfg config.Config) *aws_session.Session {

@@ -7,6 +7,7 @@ import (
 	"github.com/CyganFx/table-reservation/internal/domain"
 	"github.com/pkg/errors"
 	gomail "gopkg.in/mail.v2"
+	"time"
 )
 
 const (
@@ -67,6 +68,37 @@ func (n *notificator) UsersBooking(reservations []domain.Reservation) error {
 		if err := d.DialAndSend(m); err != nil {
 			return errors.Wrap(err, "sending email")
 		}
+	}
+
+	return nil
+}
+
+func (n *notificator) CollaborationNotify(cafe domain.Cafe) error {
+	m := gomail.NewMessage()
+	// Settings for SMTP server
+	d := gomail.NewDialer(n.Host, n.Port, n.From, n.Pass)
+	// This is only needed when SSL/TLS certificate is not valid on server.
+	// In production this should be set to false.
+	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	// Set E-Mail sender
+	m.SetHeader("From", n.From)
+
+	// Set E-Mail receivers
+	m.SetHeader("To", "duman_ishanov@mail.ru")
+	// Set E-Mail subject
+	m.SetHeader("Subject", "Collaboration")
+	// Set E-Mail body.
+	m.SetBody("text/plain", fmt.Sprintf(
+		`You have new request for collaboration,
+					Name: %s
+					Email: %s
+					Date: %v
+					Time: %v`,
+		cafe.Name, cafe.Email, time.Now().Format(dateLayout), time.Now().Format(timeLayoutWithoutSeconds)))
+
+	fmt.Println("Message: ", m)
+	if err := d.DialAndSend(m); err != nil {
+		return errors.Wrap(err, "sending email")
 	}
 
 	return nil
