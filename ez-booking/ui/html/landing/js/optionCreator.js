@@ -37,7 +37,10 @@ const timeChangeHandler = (date) => {
     dateTimeMinutes = 0;
   }
 
-  if (new Date(calendar.value) >= new Date()) {
+  if (
+    new Date(calendar.value).toLocaleDateString() >=
+    new Date().toLocaleDateString()
+  ) {
     available_time = Array(15)
       .fill()
       .map((_, idx) => 9 + idx);
