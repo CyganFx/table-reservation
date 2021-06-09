@@ -1,0 +1,63 @@
+{{template "base-layout" .}}
+{{define "title"}} Login {{end}}
+{{define "content"}}
+    {{with .Flash}}
+        <div class='flash '>{{.}}</div>
+    {{end}}
+    <br><br><br>
+
+    <section class="signup-page">
+        <form action="/api/users/sign-up" method="POST" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+            {{with .Form}}
+                <div class="cont">
+                    <div class="form sign-up">
+                        <h2>Time to feel like home</h2>
+                        <label>
+                            <span>Name</span>
+                            <input type="text" name="name" value='{{.Get "name"}}'>
+                            {{with .Errors.Get "name"}}
+                                <label class="error">{{.}}</label>
+                            {{end}}
+                        </label>
+                        <label>
+                            <span>Email</span>
+                            <input type="email" name="email" value='{{.Get "email"}}'>
+                            {{with .Errors.Get "email"}}
+                                <label class="error">{{.}}</label>
+                            {{end}}
+                        </label>
+                        <label>
+                            <span>Mobile</span>
+                            <input type="text" name="mobile" value='{{.Get "mobile"}}'>
+                            {{with .Errors.Get "mobile"}}
+                                <label class="error">{{.}}</label>
+                            {{end}}
+                        </label>
+                        <label>
+                            <span>Password</span>
+                            <input type="password" name="password">
+                            {{with .Errors.Get "password"}}
+                                <label class="error">{{.}}</label>
+                            {{end}}
+                        </label>
+                        <button type="submit" class="submit">Sign Up</button>
+                    </div>
+                    <div class="sub-cont">
+                        <div class="img">
+                            <div class="img__text m--in">
+                                <h2>One of us?</h2>
+                                <p>If you already has an account, just sign in. We've missed you!</p>
+                            </div>
+                            <a href="/api/users/login">
+                                <div class="img__btn">
+                                    <span class="m--up">Sign In</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {{end}}
+        </form>
+    </section>
+{{end}}

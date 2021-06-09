@@ -1,0 +1,41 @@
+{{template "base-layout" .}}
+{{define "title"}} Profile {{end}}
+{{define "content"}}
+    <br><br><br>
+
+    {{with .User}}
+        <section class="profile-card">
+        <h1 style="text-align: center; position: relative">Profile</h1>
+        <div class="image-container">
+            <figure class="avatar"><img src="{{.ImageURL}}" alt="profile-image" height="150px" width="150px">
+            </figure>
+            <figcaption class="title">
+                <h2>{{.Name}}</h2>
+            </figcaption>
+            <p class="text">Update Image: </p>
+            <form action="/api/users/set-image" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+                <input type="hidden" name="id" value="{{.ID}}">
+                <input type="file" name="profile-image"> <br>
+                <input type="submit" value="Upload">
+            </form>
+        </div>
+        <article class="main-container">
+            <p><i class="fa fa-envelope info"></i>{{.Email}}</p>
+            <p><i class="fa fa-phone info"> {{.Mobile}}</i></p>
+        </article>
+    {{end}}
+    <h2>Recent bookings:</h2>
+    <ul class="list-group list-group flush">
+        {{range .Reservations}}
+            {{if .IsActive}}
+                <li class="list-group-item active">{{.Date | humanDate}} - {{.Cafe.Name}}
+                    for {{.PartySize}} people Table - {{.Table.ID}}</li>
+            {{else}}
+                <li class="list-group-item">{{.Date | humanDate}} - {{.Cafe.Name}}
+                    for {{.PartySize}} people Table - {{.Table.ID}}</li>
+            {{end}}
+        {{end}}
+    </ul>
+    </section>
+{{end}}

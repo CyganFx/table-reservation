@@ -1,0 +1,90 @@
+{{template "base-layout" .}}
+{{define "title"}} Reservation {{end}}
+{{define "content"}}
+
+    <br><br><br><br><br>
+
+    <h1 class="mb-3 text-center">Reservation Page</h1>
+    <div class="d-flex justify-content-center">
+    {{with .ReservationData}}
+        <form method="POST" action="/api/reservation/tables">
+            <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+            <input type="hidden" name="cafe_id" value="{{.CafeID}}">
+
+            <div class="form-group">
+                <label>Date</label>
+                <input type="date" class="form-control" name="date" value="{{.CurrentDate}}" min="{{.CurrentDate}}"
+                       max="{{.MaxBookingDate}}">
+            </div>
+            <div class="form-group">
+                <label>Time</label>
+                <select name="bookTime" class="form-control">
+                    {{range .TimeSelector}}
+                        {{if eq . $.ReservationData.UserChoice.BookTime}}
+                            <option value="{{.}}" selected>{{.}}</option>
+                        {{else}}
+                            <option value="{{.}}">{{.}}</option>
+                        {{end}}
+                    {{end}}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Location</label>
+                <select name="location_id" class="form-control">
+                    {{range .LocationSelector}}
+                        {{if eq .ID $.ReservationData.UserChoice.LocationID}}
+                            <option value="{{.ID}}" selected>{{.Name}}</option>
+                        {{else}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                        {{end}}
+                    {{end}}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Party Size</label>
+                <select name="party_size" class="form-control">
+                    {{range .PartySizeSelector}}
+                        {{if eq . $.ReservationData.UserChoice.PartySize}}
+                            <option value="{{.}}" selected>{{.}}</option>
+                        {{else}}
+                            <option value="{{.}}">{{.}}</option>
+                        {{end}}
+                    {{end}}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Show Tables</button>
+        </form>
+        </div>
+
+        <h1 class="mb-3 text-center"> {{len .Tables}} Available tables:</h1>
+        <form method="POST" action="/api/reservation/confirm">
+        <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+        {{if .Tables}}
+            {{range .Tables}}
+                <div class="form-group">
+                    <label>Table_ID #{{.ID}} Location_ID #{{.Location.ID}} Capacity {{.Capacity}}</label>
+                    <input type="radio" name="table_id" class="form-control" value="{{.ID}}">
+                    {{range .CapacityForHTML}}
+                        <img src="/static/img/circle-as-table.png" alt="some image of chair" height="50px"
+                             width="50px">
+                    {{end}}
+                </div>
+            {{end}}
+            <div class="form-group">
+                <label>Add event (optional)</label>
+                <select name="event_id" class="form-control">
+                    {{range .EventSelector}}
+                        <option value="{{.ID}}">{{.Name}}</option>
+                    {{end}}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Description: </label>
+                <textarea name="event_description" class="form-control" cols="30" rows="5"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Book Table</button>
+            </form>
+            <br><br>
+        {{end}}
+    {{end}}
+{{end}}

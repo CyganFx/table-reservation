@@ -1,0 +1,48 @@
+{{define "navbar"}}
+    <body>
+    <!--========== SCROLL TOP ==========-->
+    <a href="#" class="scrolltop" id="scroll-top">
+        <i class='bx bx-chevron-up scrolltop__icon'></i>
+    </a>
+
+    <!--========== HEADER ==========-->
+    <header class="l-header" id="header">
+        <nav class="nav bd-container">
+            <a href="/" class="nav__logo">Tasty</a>
+
+            <div class="nav__menu" id="nav-menu">
+                <ul class="nav__list">
+                    <li class="nav__item"><a href="#home" class="nav__link active-link">Home</a></li>
+                    <li class="nav__item"><a href="#about" class="nav__link">About</a></li>
+                    <li class="nav__item"><a href="/api/menu" class="nav__link">Menu</a></li>
+                    {{if .IsAuthenticated}}
+                        <li class="nav__item"><a href="/api/users/profile/{{.User.ID}}" class="nav__link">Profile</a>
+                        </li>
+                        <li class="nav__item"><a href="/api/cafe/collaborate" class="nav__link">Collaborate</a>
+                        </li>
+                        {{/*                        {{if eq .User.Role.ID 1}}*/}}
+                        {{/*                        {{end}}*/}}
+                    {{end}}
+                    <li class="nav__item"><a href="#services" class="nav__link">Services</a></li>
+                    <li class="nav__item"><a href="#footer" class="nav__link">Contact us</a></li>
+                    {{if .IsAuthenticated}}
+                        <li class="nav__item">
+                            <form action='/api/users/logout' method='POST'>
+                                <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+                                <button class="btn btn-light">Logout</button>
+                            </form>
+                        </li>
+                    {{else}}
+                        <li class="nav__item"><a href='/api/users/sign-up' class="nav__link">Signup</a></li>
+                        <li class="nav__item"><a href='/api/users/login' class="nav__link">Login</a></li>
+                    {{end}}
+                    <li><i class='bx bx-moon change-theme' id="theme-button"></i></li>
+                </ul>
+            </div>
+
+            <div class="nav__toggle" id="nav-toggle">
+                <i class='bx bx-menu'></i>
+            </div>
+        </nav>
+    </header>
+{{end}}

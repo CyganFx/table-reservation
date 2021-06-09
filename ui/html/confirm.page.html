@@ -1,0 +1,37 @@
+{{template "base-layout" .}}
+{{define "title"}} Confirmation {{end}}
+{{define "content"}}
+    <br><br><br>
+    {{with .ReservationData.UserChoice}}
+        <h2>You are booking table {{.TableID}} at {{.Date}} {{.BookTime}} for {{.PartySize}} people</h2>
+    {{end}}
+    <form method="POST" action="/api/reservation/submit">
+        <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+        {{with .Form}}
+            <div>
+                <label>Name: </label>
+                {{with .Errors.Get "name"}}
+                    <label class="error">{{.}}</label>
+                {{end}}
+                <input type="text" name="name" value='{{.Get "name"}}'>
+            </div>
+            <div>
+                <label>Phone Number: </label>
+                {{with .Errors.Get "mobile"}}
+                    <label class="error">{{.}}</label>
+                {{end}}
+                <input type="text" name="mobile" value='{{.Get "mobile"}}'>
+            </div>
+            <div>
+                <label>Email: </label>
+                {{with .Errors.Get "email"}}
+                    <label class="error">{{.}}</label>
+                {{end}}
+                <input type="email" name="email" value='{{.Get "email"}}'>
+            </div>
+            <input type="submit" value="Book Now">
+        {{end}}
+    </form>
+    <br><br><br>
+{{end}}
+
