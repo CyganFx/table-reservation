@@ -1,6 +1,7 @@
 package http_v1
 
 import (
+	"encoding/gob"
 	"fmt"
 	"github.com/CyganFx/table-reservation/internal/domain"
 	"github.com/gin-contrib/sessions"
@@ -12,12 +13,14 @@ import (
 func (h *handler) initCafeRoutes(api *gin.RouterGroup) {
 	cafe := api.Group("/cafe")
 	{
+		cafe.POST("/filter", h.Filter)
 		authenticated := cafe.Group("/", h.RequireAuthentication())
 		{
 			authenticated.GET("/collaborate", h.CollaboratePage)
 			authenticated.POST("/collaborate", h.Collaborate)
 		}
 	}
+	gob.Register([]domain.Cafe{})
 }
 
 type CafeService interface {
@@ -30,6 +33,7 @@ type CafeService interface {
 	SetLocations(cafeID int, locations []string) error
 	SetEvents(cafeID int, events []string) error
 	SetTables(cafeID, locationID, numOfTables, capacity int) error
+	GetCafesFiltered(typeID, cityID int) ([]domain.Cafe, error)
 }
 
 type CollaborateData struct {
@@ -40,12 +44,55 @@ type CollaborateData struct {
 }
 
 func (h *handler) MainPage(c *gin.Context) {
-	cafes, err := h.cafeService.GetCafes()
+	var err error
+	session := sessions.Default(c)
+	var cafes []domain.Cafe
+
+	if session.Get("cafes") != nil {
+		cafes = session.Get("cafes").([]domain.Cafe)
+		session.Delete("cafes")
+		session.Save()
+	} else {
+		cafes, err = h.cafeService.GetCafes()
+		if err != nil {
+			h.errors.ServerError(c, err)
+			return
+		}
+	}
+
+	var types []domain.Type
+	var cities []domain.City
+
+	types, err = h.cafeService.GetTypes()
 	if err != nil {
 		h.errors.ServerError(c, err)
 		return
 	}
-	h.render(c, "landing.page.html", &templateData{Cafes: cafes})
+	cities, err = h.cafeService.GetCities()
+	if err != nil {
+		h.errors.ServerError(c, err)
+		return
+	}
+
+	h.render(c, "landing.page.html", &templateData{Cafes: cafes, Types: types, Cities: cities})
+}
+
+func (h *handler) Filter(c *gin.Context) {
+
+	typeID, _ := strconv.Atoi(c.Request.FormValue("type"))
+	cityID, _ := strconv.Atoi(c.Request.FormValue("city"))
+
+	cafes, err := h.cafeService.GetCafesFiltered(typeID, cityID)
+	if err != nil {
+		h.errors.ServerError(c, err)
+		return
+	}
+
+	session := sessions.Default(c)
+	session.Set("cafes", cafes)
+	session.Save()
+
+	http.Redirect(c.Writer, c.Request, "/", http.StatusSeeOther)
 }
 
 func (h *handler) CollaboratePage(c *gin.Context) {
@@ -143,5 +190,5 @@ func (h *handler) Collaborate(c *gin.Context) {
 	session.Set("flash", "Thanks, your request is being considered")
 	session.Save()
 
-	h.MainPage(c)
+	http.Redirect(c.Writer, c.Request, "/", http.StatusSeeOther)
 }

@@ -189,5 +189,5 @@ func (h *handler) BookTable(c *gin.Context) {
 	session.Set("flash", "Booked successfully! You will get notifications as your time comes")
 	session.Save()
 
-	h.MainPage(c)
+	http.Redirect(c.Writer, c.Request, "/", http.StatusSeeOther)
 }

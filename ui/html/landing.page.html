@@ -249,10 +249,34 @@
         </div>
     </div>
 
+    <h1>Filter by category</h1>
+    <form action="/api/cafe/filter" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+        <div class="form-group">
+            <label>Type</label>
+            <select class="form-control" name="type">
+                {{range .Types}}
+                    <option value="{{.ID}}">{{.Name}}</option>
+                {{end}}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Type</label>
+            <select class="form-control" name="city">
+                {{range .Cities}}
+                    <option value="{{.ID}}">{{.Name}}</option>
+                {{end}}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-info">Filter</button>
+    </form>
+
     <!--========== Cafes ==========-->
     {{range .Cafes}}
         <p>Name: {{.Name}}</p>
         <p>Address: {{.Address}}</p>
+        <img src="{{.ImageURL}}" style="max-height: 125px; max-width: 125px"/>
+        <p>Type: {{.Type.Name}}</p>
         <a href="/api/reservation/cafe/{{.ID}}">See</a>
     {{end}}
 

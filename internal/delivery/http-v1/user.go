@@ -149,7 +149,7 @@ func (h *handler) Login(c *gin.Context) {
 
 	if session.Get("redirectPathAfterLogin") == nil {
 		session.Save()
-		h.MainPage(c)
+		http.Redirect(c.Writer, c.Request, "/", http.StatusSeeOther)
 		return
 	}
 
@@ -164,7 +164,7 @@ func (h *handler) Logout(c *gin.Context) {
 	session.Delete("authenticatedUserID")
 	session.Set("flash", "You've been logged out successfully!")
 	session.Save()
-	h.MainPage(c)
+	http.Redirect(c.Writer, c.Request, "/", http.StatusSeeOther)
 }
 
 ////using AWS S3 to store profile images
