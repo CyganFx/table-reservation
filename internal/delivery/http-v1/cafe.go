@@ -45,11 +45,10 @@ func (h *handler) MainPage(c *gin.Context) {
 		h.errors.ServerError(c, err)
 		return
 	}
-	h.render(c, "main.page.html", &templateData{Cafes: cafes})
+	h.render(c, "landing.page.html", &templateData{Cafes: cafes})
 }
 
 func (h *handler) CollaboratePage(c *gin.Context) {
-	fmt.Print("I am here!")
 	locations, err := h.cafeService.GetLocations()
 	if err != nil {
 		h.errors.ServerError(c, err)
