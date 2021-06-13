@@ -14,6 +14,8 @@ func (h *handler) initCafeRoutes(api *gin.RouterGroup) {
 	cafe := api.Group("/cafe")
 	{
 		cafe.POST("/filter", h.Filter)
+		cafe.GET("/all", h.AllCafesPage)
+
 		authenticated := cafe.Group("/", h.RequireAuthentication())
 		{
 			authenticated.GET("/collaborate", h.CollaboratePage)
@@ -44,6 +46,11 @@ type CollaborateData struct {
 }
 
 func (h *handler) MainPage(c *gin.Context) {
+	h.render(c, "landing.page.html", nil)
+}
+
+//Test page
+func (h *handler) AllCafesPage(c *gin.Context)  {
 	var err error
 	session := sessions.Default(c)
 	var cafes []domain.Cafe
@@ -74,7 +81,7 @@ func (h *handler) MainPage(c *gin.Context) {
 		return
 	}
 
-	h.render(c, "landing.page.html", &templateData{Cafes: cafes, Types: types, Cities: cities})
+	h.render(c, "restaurant_list.page.html", &templateData{Cafes: cafes, Types: types, Cities: cities})
 }
 
 func (h *handler) Filter(c *gin.Context) {
@@ -92,7 +99,7 @@ func (h *handler) Filter(c *gin.Context) {
 	session.Set("cafes", cafes)
 	session.Save()
 
-	http.Redirect(c.Writer, c.Request, "/", http.StatusSeeOther)
+	http.Redirect(c.Writer, c.Request, "/api/cafe/all", http.StatusSeeOther)
 }
 
 func (h *handler) CollaboratePage(c *gin.Context) {

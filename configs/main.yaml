@@ -6,7 +6,7 @@ postgres:
   host: "127.0.0.1"
   port: "5432"
   username: "postgres"
-  dbName: "table_reservation"
+  dbName: "table_res"
 
 fileStorage:
   bucketName: "ez-booking-bucket"
@@ -17,4 +17,3 @@ smtp:
   host: "smtp.gmail.com"
   port: 587
   from: "duman070601@gmail.com"
-
