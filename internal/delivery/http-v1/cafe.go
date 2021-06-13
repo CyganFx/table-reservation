@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"github.com/CyganFx/table-reservation/internal/domain"
+	"github.com/CyganFx/table-reservation/pkg/validator/forms"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -13,8 +14,9 @@ import (
 func (h *handler) initCafeRoutes(api *gin.RouterGroup) {
 	cafe := api.Group("/cafe")
 	{
-		cafe.POST("/filter", h.Filter)
 		cafe.GET("/all", h.AllCafesPage)
+		cafe.POST("/filter", h.Filter)
+		cafe.POST("/search", h.Search)
 
 		authenticated := cafe.Group("/", h.RequireAuthentication())
 		{
@@ -36,6 +38,7 @@ type CafeService interface {
 	SetEvents(cafeID int, events []string) error
 	SetTables(cafeID, locationID, numOfTables, capacity int) error
 	GetCafesFiltered(typeID, cityID int) ([]domain.Cafe, error)
+	Search(name string) ([]domain.Cafe, error)
 }
 
 type CollaborateData struct {
@@ -50,7 +53,7 @@ func (h *handler) MainPage(c *gin.Context) {
 }
 
 //Test page
-func (h *handler) AllCafesPage(c *gin.Context)  {
+func (h *handler) AllCafesPage(c *gin.Context) {
 	var err error
 	session := sessions.Default(c)
 	var cafes []domain.Cafe
@@ -81,7 +84,45 @@ func (h *handler) AllCafesPage(c *gin.Context)  {
 		return
 	}
 
-	h.render(c, "restaurant_list.page.html", &templateData{Cafes: cafes, Types: types, Cities: cities})
+	h.render(c, "restaurant_list.page.html", &templateData{Form: forms.New(nil), Cafes: cafes, Types: types, Cities: cities})
+}
+
+func (h *handler) Search(c *gin.Context) {
+	if err := c.Request.ParseForm(); err != nil {
+		h.errors.ClientError(c, http.StatusBadRequest)
+		return
+	}
+
+	form := forms.New(c.Request.PostForm)
+
+	name := form.Get("search")
+
+	results, err := h.cafeService.Search(name)
+	if err != nil {
+		h.errors.ServerError(c, err)
+		return
+	}
+
+	if len(results) == 0 {
+		form.Errors.Add("search", "not found")
+	}
+
+	var types []domain.Type
+	var cities []domain.City
+
+	types, err = h.cafeService.GetTypes()
+	if err != nil {
+		h.errors.ServerError(c, err)
+		return
+	}
+
+	cities, err = h.cafeService.GetCities()
+	if err != nil {
+		h.errors.ServerError(c, err)
+		return
+	}
+
+	h.render(c, "restaurant_list.page.html", &templateData{Form: form, Cafes: results, Types: types, Cities: cities})
 }
 
 func (h *handler) Filter(c *gin.Context) {

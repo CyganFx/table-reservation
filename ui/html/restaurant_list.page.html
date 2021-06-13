@@ -4,40 +4,44 @@
     {{with .Flash}}
         <div class='flash'>{{.}}</div>
     {{end}}
-<style>
-    .gradient_line {
-        width: 12rem;
-        background: -webkit-linear-gradient(45deg, #39c223, #0038ff);
-        height: 5px;
-    }
-    .custom_select {
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        text-indent: 1px;
-        text-overflow: "";
-        border: .5px solid #39c223;
-        width: 100%;
-    }
-    .search-field__background {
-        background-image: url(../../static/img/green_wood_texture.jpg);
-        background-position: 100%;
-        background-repeat: no-repeat;
-        background-size: cover;
-        height: 5rem;
-        opacity: 1;
-    }
-    .book_button {
-        color: #36a448;
-        outline: none;
-        border-color: #36a448;
-        text-decoration: none;
-    }
-    .book_button:hover{
-        background-color: #36a448;
-        border-color: white;
-        color: white;
-    }
-</style>
+    <style>
+        .gradient_line {
+            width: 12rem;
+            background: -webkit-linear-gradient(45deg, #39c223, #0038ff);
+            height: 5px;
+        }
+
+        .custom_select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            text-indent: 1px;
+            text-overflow: "";
+            border: .5px solid #39c223;
+            width: 100%;
+        }
+
+        .search-field__background {
+            background-image: url(../../static/img/green_wood_texture.jpg);
+            background-position: 100%;
+            background-repeat: no-repeat;
+            background-size: cover;
+            height: 5rem;
+            opacity: 1;
+        }
+
+        .book_button {
+            color: #36a448;
+            outline: none;
+            border-color: #36a448;
+            text-decoration: none;
+        }
+
+        .book_button:hover {
+            background-color: #36a448;
+            border-color: white;
+            color: white;
+        }
+    </style>
     <div
             class="
         flex flex-col
@@ -48,12 +52,15 @@
         search-field__background
       "
     >
-        <!--Search field-->
-        <div class="search-field flex space-x-5">
-            <!--Search-->
-            <div class="relative w-96">
-                <div
-                        class="
+        <form action="/api/cafe/search" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+            {{with .Form}}
+                <!--Search field-->
+                <div class="search-field flex space-x-5">
+                    <!--Search-->
+                    <div class="relative w-96">
+                        <div
+                                class="
               absolute
               top-0
               left-0
@@ -63,23 +70,23 @@
               justify-center
               items-center
             "
-                >
-                    <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-4 w-4"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                    >
-                        <path
-                                fill-rule="evenodd"
-                                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                                clip-rule="evenodd"
-                        />
-                    </svg>
-                </div>
-                <input
-                        type="text"
-                        class="
+                        >
+                            <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                            >
+                                <path
+                                        fill-rule="evenodd"
+                                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                        clip-rule="evenodd"
+                                />
+                            </svg>
+                        </div>
+                        <input
+                                type="text"
+                                class="
               h-8
               w-full
               py-2
@@ -91,16 +98,22 @@
               placeholder-gray-400
               focus:outline-none
             "
-                        placeholder="Restaurant, Features, or other"
-                />
-            </div>
-            <div
-                    class="max-h-8 rounded-sm text-sm flex justify-center items-center"
-                    style="background-color: #36a448"
-            >
-                <a class="monts font-medium px-1.5 text-white" href="#">Find Table</a>
-            </div>
-        </div>
+                                placeholder="Restaurant, Features, or other"
+                                id="search" name="search" value="{{.Get "search"}}"
+                        />
+                    </div>
+                    {{with .Errors.Get "search"}}
+                        <label class="error">{{.}}</label>
+                    {{end}}
+                    <div
+                            class="max-h-8 rounded-sm text-sm flex justify-center items-center"
+                            style="background-color: #36a448"
+                    >
+                        <button type="submit"><a class="monts font-medium px-1.5 text-white">Find Place</a></button>
+                    </div>
+                </div>
+            {{end}}
+        </form>
     </div>
     <div class="flex flex-col p-6">
         <div class="flex px-24 space-x-24">
@@ -133,7 +146,7 @@
                                 style="background-color: #36a448"
                         >
                             <button class="monts font-medium px-1.5 py-2 text-white" type="submit">
-                                Find Table
+                                Filter
                             </button>
                         </div>
                     </form>
@@ -153,7 +166,7 @@
                         </select>
                     </div>
                 </div>
-                <hr />
+                <hr/>
                 <div class="flex flex-col monts p-4 space-y-6">
                     {{range .Cafes}}
                         <div class="flex space-x-4">
@@ -161,7 +174,8 @@
                                 <img src="{{.ImageURL}}"/>
                             </div>
                             <div class="flex flex-col justify-left space-y-2">
-                                <div style="color: #36a448" class="font-semibold text-lg">{{.Name}} | {{.Type.Name}}</div>
+                                <div style="color: #36a448" class="font-semibold text-lg">{{.Name}}
+                                    | {{.Type.Name}}</div>
                                 <div class="text-sm">Address: {{.Address}}</div>
                                 <a class="book_button w-40 py-1.5 text-center border-2 text-xs rounded-sm"
                                    href="/api/reservation/cafe/{{.ID}}">

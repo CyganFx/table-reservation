@@ -1,6 +1,9 @@
 package service
 
-import "github.com/CyganFx/table-reservation/internal/domain"
+import (
+	"github.com/CyganFx/table-reservation/internal/domain"
+	"strings"
+)
 
 type cafe struct {
 	repo CafeRepo
@@ -21,6 +24,7 @@ type CafeRepo interface {
 	SetEventsByCafeID(cafeID int, events []string) error
 	SetTablesByCafeID(cafeID, locationID, numOfTables, capacity int) error
 	FindCafesFiltered(typeID, cityID int) ([]domain.Cafe, error)
+	SearchByName(name string) ([]domain.Cafe, error)
 }
 
 func (c *cafe) GetLocations() ([]domain.Location, error) {
@@ -61,4 +65,9 @@ func (c *cafe) GetCafes() ([]domain.Cafe, error) {
 
 func (c *cafe) GetCafesFiltered(typeID, cityID int) ([]domain.Cafe, error) {
 	return c.repo.FindCafesFiltered(typeID, cityID)
+}
+
+func (c *cafe) Search(name string) ([]domain.Cafe, error) {
+	name = strings.ToLower(name)
+	return c.repo.SearchByName(name)
 }

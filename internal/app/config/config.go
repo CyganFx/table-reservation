@@ -31,7 +31,7 @@ type Config struct {
 		Port     string `yaml:"port"`
 		Username string `yaml:"username"`
 		DBName   string `yaml:"dbName"`
-		Password string
+		Password string `conf:"default:postgres,noprint"`
 	} `yaml:"postgres"`
 
 	FileStorage struct {
@@ -39,14 +39,14 @@ type Config struct {
 		BucketName      string `yaml:"bucketName"`
 		AccessKey       string `yaml:"aws_access_key"`
 		AwsRegion       string `yaml:"awsRegion"`
-		SecretAccessKey string
+		SecretAccessKey string `conf:"default:secret,noprint"`
 	} `yaml:"fileStorage"`
 
 	SMTP struct {
 		Host string `conf:"default:smtp.gmail.com" yaml:"host"`
 		Port int    `conf:"default:587" yaml:"port"`
 		From string `conf:"default:duman070601@gmail.com" yaml:"from"`
-		Pass string
+		Pass string `conf:"default:secret,noprint"`
 	}
 }
 
