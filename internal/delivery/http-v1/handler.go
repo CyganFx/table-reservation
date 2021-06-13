@@ -51,6 +51,8 @@ type templateData struct {
 	ReservationData *ReservationData
 	CollaborateData *CollaborateData
 	Cafes           []domain.Cafe
+	Types           []domain.Type
+	Cities          []domain.City
 	Reservations    []domain.Reservation
 	Form            *forms.FormValidator
 	CurrentYear     int

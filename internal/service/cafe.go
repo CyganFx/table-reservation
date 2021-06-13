@@ -20,6 +20,7 @@ type CafeRepo interface {
 	SetLocationsByCafeID(cafeID int, locations []string) error
 	SetEventsByCafeID(cafeID int, events []string) error
 	SetTablesByCafeID(cafeID, locationID, numOfTables, capacity int) error
+	FindCafesFiltered(typeID, cityID int) ([]domain.Cafe, error)
 }
 
 func (c *cafe) GetLocations() ([]domain.Location, error) {
@@ -56,4 +57,8 @@ func (c *cafe) SetTables(cafeID, locationID, numOfTables, capacity int) error {
 
 func (c *cafe) GetCafes() ([]domain.Cafe, error) {
 	return c.repo.FindCafes()
+}
+
+func (c *cafe) GetCafesFiltered(typeID, cityID int) ([]domain.Cafe, error) {
+	return c.repo.FindCafesFiltered(typeID, cityID)
 }
