@@ -1,7 +1,40 @@
 {{template "base-layout" .}}
 {{define "title"}} Reservation {{end}}
 {{define "content"}}
-
+    <style>
+        .chair {
+            background-color: gray;
+        }
+        .av_table {
+            color: white;
+            display: block;
+            background-color: gray;
+            box-shadow: 0 3px 9pt rgba(0, 0, 0, 0.23), 0 3px 9pt rgba(0, 0, 0, 0.16);
+        }
+        .table-container {
+            display: block;
+            position: relative;
+            cursor: pointer;
+            font-size: 22px;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        .table-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+        .table-container input:checked ~ .av_table {
+            background-color: #36a448;
+        }
+        .sofa {
+            background-color: brown;
+        }
+    </style>
     <h1 class="mb-3 text-center">Reservation Page</h1>
     <div class="d-flex justify-content-center">
     {{with .ReservationData}}
@@ -93,21 +126,70 @@
             </div>
         </form>
         </div>
-
+        <br>
         <h1 class="mb-3 text-center"> {{len .Tables}} Available tables:</h1>
-        <form method="POST" action="/api/reservation/confirm">
+        <div class="d-flex justify-content-center">
+            <form method="POST" action="/api/reservation/confirm">
         <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
         {{if .Tables}}
-            {{range .Tables}}
-                <div class="form-group">
-                    <label>Table_ID #{{.ID}} Location_ID #{{.Location.ID}} Capacity {{.Capacity}}</label>
-                    <input type="radio" name="table_id" class="form-control" value="{{.ID}}">
-                    {{range .CapacityForHTML}}
-                        <img src="/static/img/circle-as-table.png" alt="some image of chair" height="50px"
-                             width="50px">
+            <div class="flex flex-wrap space-x-10 px-8">
+                {{range .Tables}}
+                    {{if eq .Capacity 2}}
+                        <div class="flex flex-row justify-center items-center space-x-1">
+                            <div class="w-6 h-6 chair"></div>
+                            <label class="table-container">
+                                <input name="table_id" type="radio" />
+                                <span class="text-center w-10 h-10 av_table rounded-full">{{.Capacity}}</span>
+                            </label>
+                            <div class="w-6 h-6 chair"></div>
+                        </div>
                     {{end}}
-                </div>
-            {{end}}
+                    {{if eq .Capacity 4}}
+                        <div class="flex flex-row justify-center items-center space-x-1">
+                            <div class="flex flex-col space-y-2">
+                                <div class="w-6 h-6 chair"></div>
+                                <div class="w-6 h-6 chair"></div>
+                            </div>
+                            <label class="table-container">
+                                <input name="table_id" type="radio" />
+                                <span class="text-center w-10 h-20 av_table">{{.Capacity}}</span>
+                            </label>
+                            <div class="flex flex-col space-y-2">
+                                <div class="w-6 h-6 chair"></div>
+                                <div class="w-6 h-6 chair"></div>
+                            </div>
+                        </div>
+                    {{end}}
+                    {{if eq .Capacity 6}}
+                        <div class="flex flex-row justify-center items-center space-x-1">
+                            <div class="flex flex-col space-y-2">
+                                <div class="w-6 h-6 chair"></div>
+                                <div class="w-6 h-6 chair"></div>
+                                <div class="w-6 h-6 chair"></div>
+                            </div>
+                            <label class="table-container">
+                                <input name="table_id" type="radio" />
+                                <span class="text-center w-10 h-24 av_table">{{.Capacity}}</span>
+                            </label>
+                            <div class="flex flex-col space-y-2">
+                                <div class="w-6 h-6 chair"></div>
+                                <div class="w-6 h-6 chair"></div>
+                                <div class="w-6 h-6 chair"></div>
+                            </div>
+                        </div>
+                    {{end}}
+                    {{if eq .Capacity 8}}
+                        <div class="flex flex-row justify-center items-center space-x-1">
+                            <div class="w-6 h-20 chair sofa"></div>
+                            <label class="table-container">
+                                <input name="table_id" type="radio" />
+                                <span class="text-center w-10 h-20 av_table">{{.Capacity}}</span>
+                            </label>
+                            <div class="w-6 h-20 chair sofa"></div>
+                        </div>
+                    {{end}}
+                {{end}}
+            </div>
             <div class="form-group">
                 <label>Add event (optional)</label>
                 <select name="event_id" class="form-control">
@@ -120,8 +202,16 @@
                 <label>Description: </label>
                 <textarea name="event_description" class="form-control" cols="30" rows="5"></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Book Table</button>
+            <div class="flex flex-wrap -mx-3 mb-3 justify-center">
+                <button class="w-4/5 md:w-full monts font-medium px-1.5 py-2.5 text-white
+            max-h-8 rounded-sm text-sm flex justify-center items-center"
+                        style="background-color: #36a448"
+                        type="submit">
+                    Book Table
+                </button>
+            </div>
             </form>
+</div>
             <br><br>
         {{end}}
     {{end}}
