@@ -176,13 +176,13 @@
                             <div class="flex flex-col justify-left space-y-2">
                                 <div style="color: #36a448" class="font-semibold text-lg">{{.Name}}
                                     | {{.Type.Name}}</div>
-                                <div class="text-sm">Description: {{.Description}}</div>
                                 <div class="text-sm">Address: {{.Address}}</div>
                                 <div class="text-sm">Mobile: {{.Mobile}}</div>
                                 <a class="book_button w-40 py-1.5 text-center border-2 text-xs rounded-sm"
                                    href="/api/reservation/cafe/{{.ID}}">
                                     Book table
                                 </a>
+                                <div class="text-sm w-full flex flex-wrap">{{printf "%.25s" .Description}}...</div>
                             </div>
                         </div>
                     {{end}}
