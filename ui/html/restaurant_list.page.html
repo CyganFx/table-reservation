@@ -61,15 +61,15 @@
                     <div class="relative w-96">
                         <div
                                 class="
-              absolute
-              top-0
-              left-0
-              h-full
-              w-8
-              flex
-              justify-center
-              items-center
-            "
+                                      absolute
+                                      top-0
+                                      left-0
+                                      h-full
+                                      w-8
+                                      flex
+                                      justify-center
+                                      items-center
+                                    "
                         >
                             <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -176,7 +176,9 @@
                             <div class="flex flex-col justify-left space-y-2">
                                 <div style="color: #36a448" class="font-semibold text-lg">{{.Name}}
                                     | {{.Type.Name}}</div>
+                                <div class="text-sm">Description: {{.Description}}</div>
                                 <div class="text-sm">Address: {{.Address}}</div>
+                                <div class="text-sm">Mobile: {{.Mobile}}</div>
                                 <a class="book_button w-40 py-1.5 text-center border-2 text-xs rounded-sm"
                                    href="/api/reservation/cafe/{{.ID}}">
                                     Book table

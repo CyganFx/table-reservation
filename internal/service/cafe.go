@@ -25,6 +25,9 @@ type CafeRepo interface {
 	SetTablesByCafeID(cafeID, locationID, numOfTables, capacity int) error
 	FindCafesFiltered(typeID, cityID int) ([]domain.Cafe, error)
 	SearchByName(name string) ([]domain.Cafe, error)
+	FindCollabRequests() ([]domain.Cafe, error)
+	ApproveByID(cafeID int) error
+	DeleteByID(cafeID int) error
 }
 
 func (c *cafe) GetLocations() ([]domain.Location, error) {
@@ -70,4 +73,16 @@ func (c *cafe) GetCafesFiltered(typeID, cityID int) ([]domain.Cafe, error) {
 func (c *cafe) Search(name string) ([]domain.Cafe, error) {
 	name = strings.ToLower(name)
 	return c.repo.SearchByName(name)
+}
+
+func (c *cafe) GetCollabRequests() ([]domain.Cafe, error) {
+	return c.repo.FindCollabRequests()
+}
+
+func (c *cafe) Approve(cafeID int) error {
+	return c.repo.ApproveByID(cafeID)
+}
+
+func (c *cafe) Disapprove(cafeID int) error {
+	return c.repo.DeleteByID(cafeID)
 }

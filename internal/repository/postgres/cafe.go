@@ -134,8 +134,8 @@ func (c *cafe) FindCities() ([]domain.City, error) {
 }
 
 func (c *cafe) FindCafes() ([]domain.Cafe, error) {
-	query := `SELECT c.id, c.name, c.city_id, city.name, c.type_id, type.name, c.address, c.mobile, c.email, c.created, c.image
-			FROM cafes as c join types as type on c.type_id = type.id join cities as city on c.city_id = city.id`
+	query := `SELECT c.id, c.name, c.city_id, city.name, c.description, c.type_id, type.name, c.address, c.mobile, c.email, c.created, c.image
+			FROM cafes as c join types as type on c.type_id = type.id join cities as city on c.city_id = city.id where c.status = true`
 
 	rows, err := c.db.Query(context.Background(), query)
 	if err != nil {
@@ -147,7 +147,7 @@ func (c *cafe) FindCafes() ([]domain.Cafe, error) {
 
 	for rows.Next() {
 		c := cafesPool.Get().(*domain.Cafe)
-		err = rows.Scan(&c.ID, &c.Name, &c.City.ID, &c.City.Name, &c.Type.ID, &c.Type.Name, &c.Address, &c.Mobile, &c.Email, &c.Created, &c.ImageURL)
+		err = rows.Scan(&c.ID, &c.Name, &c.City.ID, &c.City.Name, &c.Description, &c.Type.ID, &c.Type.Name, &c.Address, &c.Mobile, &c.Email, &c.Created, &c.ImageURL)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to assign values to type struct from row")
 		}
@@ -164,8 +164,9 @@ func (c *cafe) FindCafes() ([]domain.Cafe, error) {
 }
 
 func (c *cafe) FindCafesFiltered(typeID, cityID int) ([]domain.Cafe, error) {
-	query := `SELECT c.id, c.name, c.city_id, city.name, c.type_id, type.name, c.address, c.mobile, c.email, c.created, c.image
-			FROM cafes as c join types as type on c.type_id = type.id join cities as city on c.city_id = city.id where type_id = $1 and city_id = $2`
+	query := `SELECT c.id, c.name, c.city_id, city.name, c.description, c.type_id, type.name, c.address, c.mobile, c.email, c.created, c.image
+			FROM cafes as c join types as type on c.type_id = type.id join cities as city on c.city_id = city.id
+			where type_id = $1 and city_id = $2 and c.status = true`
 
 	rows, err := c.db.Query(context.Background(), query, typeID, cityID)
 	if err != nil {
@@ -177,7 +178,7 @@ func (c *cafe) FindCafesFiltered(typeID, cityID int) ([]domain.Cafe, error) {
 
 	for rows.Next() {
 		c := cafesPool.Get().(*domain.Cafe)
-		err = rows.Scan(&c.ID, &c.Name, &c.City.ID, &c.City.Name, &c.Type.ID, &c.Type.Name, &c.Address, &c.Mobile, &c.Email, &c.Created, &c.ImageURL)
+		err = rows.Scan(&c.ID, &c.Name, &c.City.ID, &c.City.Name, &c.Description, &c.Type.ID, &c.Type.Name, &c.Address, &c.Mobile, &c.Email, &c.Created, &c.ImageURL)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to assign values to type struct from row")
 		}
@@ -194,10 +195,10 @@ func (c *cafe) FindCafesFiltered(typeID, cityID int) ([]domain.Cafe, error) {
 }
 
 func (c *cafe) Insert(cafe *domain.Cafe) error {
-	query := `INSERT INTO cafes (name, city_id, type_id, address, mobile, email, created)
-	VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id`
+	query := `INSERT INTO cafes (name, city_id, type_id, address, mobile, email, image, description, created)
+	VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`
 	err := c.db.QueryRow(context.Background(), query, cafe.Name, cafe.City.ID,
-		cafe.Type.ID, cafe.Address, cafe.Mobile, cafe.Email, time.Now()).
+		cafe.Type.ID, cafe.Address, cafe.Mobile, cafe.Email, cafe.ImageURL, cafe.Description, time.Now()).
 		Scan(&cafe.ID)
 	if err != nil {
 		return errors.Wrap(err, "failed to insert cafe")
@@ -256,9 +257,9 @@ func (c *cafe) SetTablesByCafeID(cafeID, locationID, numOfTables, capacity int) 
 }
 
 func (c *cafe) SearchByName(name string) ([]domain.Cafe, error) {
-	query := `SELECT c.id, c.name, c.city_id, city.name, c.type_id, type.name, c.address, c.mobile, c.email, c.created, c.image
+	query := `SELECT c.id, c.name, c.city_id, city.name, c.description, c.type_id, type.name, c.address, c.mobile, c.email, c.created, c.image
 			FROM cafes as c join types as type on c.type_id = type.id join cities as city on c.city_id = city.id
-			where LOWER(c.name) like $1`
+			where LOWER(c.name) like $1 and c.status = true`
 
 	rows, err := c.db.Query(context.Background(), query, "%"+name+"%")
 	if err != nil {
@@ -270,7 +271,7 @@ func (c *cafe) SearchByName(name string) ([]domain.Cafe, error) {
 
 	for rows.Next() {
 		c := cafesPool.Get().(*domain.Cafe)
-		err = rows.Scan(&c.ID, &c.Name, &c.City.ID, &c.City.Name, &c.Type.ID, &c.Type.Name, &c.Address, &c.Mobile, &c.Email, &c.Created, &c.ImageURL)
+		err = rows.Scan(&c.ID, &c.Name, &c.City.ID, &c.City.Name, &c.Description, &c.Type.ID, &c.Type.Name, &c.Address, &c.Mobile, &c.Email, &c.Created, &c.ImageURL)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to assign values to type struct from row")
 		}
@@ -284,4 +285,88 @@ func (c *cafe) SearchByName(name string) ([]domain.Cafe, error) {
 	}
 
 	return cc, nil
+}
+
+func (c *cafe) FindCollabRequests() ([]domain.Cafe, error) {
+	query := `SELECT c.id, c.name, c.city_id, city.name, c.description, c.type_id, type.name, c.address, c.mobile, c.email, c.created, c.image
+			FROM cafes as c join types as type on c.type_id = type.id join cities as city on c.city_id = city.id where c.status = false`
+
+	rows, err := c.db.Query(context.Background(), query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var cc []domain.Cafe
+
+	for rows.Next() {
+		c := cafesPool.Get().(*domain.Cafe)
+		err = rows.Scan(&c.ID, &c.Name, &c.City.ID, &c.City.Name, &c.Description, &c.Type.ID, &c.Type.Name, &c.Address, &c.Mobile, &c.Email, &c.Created, &c.ImageURL)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to assign values to type struct from row")
+		}
+		cc = append(cc, *c)
+
+		*c = domain.Cafe{}
+		cafesPool.Put(c)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return cc, nil
+}
+
+func (c *cafe) ApproveByID(cafeID int) error {
+	query := `update cafes set status = true where id = $1`
+	_, err := c.db.Exec(context.Background(), query, cafeID)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return domain.ErrInvalidCredentials
+		}
+		return errors.Wrap(err, "failed to update cafe status")
+	}
+
+	return nil
+}
+
+func (c *cafe) DeleteByID(cafeID int) error {
+
+	query := `DELETE from tables where cafe_id = $1`
+	_, err := c.db.Exec(context.Background(), query, cafeID)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return domain.ErrInvalidCredentials
+		}
+		return errors.Wrap(err, "failed to delete cafe")
+	}
+
+	query = `DELETE from cafes_events where cafe_id = $1`
+	_, err = c.db.Exec(context.Background(), query, cafeID)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return domain.ErrInvalidCredentials
+		}
+		return errors.Wrap(err, "failed to delete cafe")
+	}
+
+	query = `DELETE from cafes_locations where cafe_id = $1`
+	_, err = c.db.Exec(context.Background(), query, cafeID)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return domain.ErrInvalidCredentials
+		}
+		return errors.Wrap(err, "failed to delete cafe")
+	}
+
+	query = `DELETE from cafes where id = $1`
+	_, err = c.db.Exec(context.Background(), query, cafeID)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return domain.ErrInvalidCredentials
+		}
+		return errors.Wrap(err, "failed to delete cafe")
+	}
+
+	return nil
 }

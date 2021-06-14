@@ -102,6 +102,7 @@ func (h *handler) Init(cfg config.Config) http.Handler {
 
 	api := router.Group("/api")
 	{
+		h.initAdminRoutes(api)
 		h.initUserRoutes(api)
 		h.initReservationRoutes(api)
 		h.initCafeRoutes(api)

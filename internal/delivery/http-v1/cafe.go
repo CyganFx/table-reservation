@@ -39,6 +39,9 @@ type CafeService interface {
 	SetTables(cafeID, locationID, numOfTables, capacity int) error
 	GetCafesFiltered(typeID, cityID int) ([]domain.Cafe, error)
 	Search(name string) ([]domain.Cafe, error)
+	GetCollabRequests() ([]domain.Cafe, error)
+	Approve(cafeID int) error
+	Disapprove(cafeID int) error
 }
 
 type CollaborateData struct {
@@ -187,16 +190,20 @@ func (h *handler) Collaborate(c *gin.Context) {
 	address := c.Request.FormValue("address")
 	mobile := c.Request.FormValue("mobile")
 	email := c.Request.FormValue("email")
+	description := c.Request.FormValue("description")
 	cityID, _ := strconv.Atoi(c.Request.FormValue("city"))
 	typeID, _ := strconv.Atoi(c.Request.FormValue("type"))
+	image := c.Request.FormValue("image")
 
 	cafe := &domain.Cafe{
-		Name:    name,
-		Address: address,
-		Mobile:  mobile,
-		Email:   email,
-		City:    domain.City{},
-		Type:    domain.Type{},
+		Name:        name,
+		Address:     address,
+		Mobile:      mobile,
+		Email:       email,
+		Description: description,
+		ImageURL:    image,
+		City:        domain.City{},
+		Type:        domain.Type{},
 	}
 	cafe.City.ID = cityID
 	cafe.Type.ID = typeID
@@ -211,6 +218,7 @@ func (h *handler) Collaborate(c *gin.Context) {
 		h.errors.ServerError(c, err)
 		return
 	}
+
 	events := c.Request.Form["events"]
 	if err := h.cafeService.SetEvents(cafe.ID, events); err != nil {
 		h.errors.ServerError(c, err)

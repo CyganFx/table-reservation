@@ -156,14 +156,17 @@ func (h *handler) Login(c *gin.Context) {
 	path := session.Get("redirectPathAfterLogin").(string)
 	session.Delete("redirectPathAfterLogin")
 	session.Save()
+
 	http.Redirect(c.Writer, c.Request, path, http.StatusSeeOther)
 }
 
 func (h *handler) Logout(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Delete("authenticatedUserID")
+	session.Delete("role")
 	session.Set("flash", "You've been logged out successfully!")
 	session.Save()
+
 	http.Redirect(c.Writer, c.Request, "/", http.StatusSeeOther)
 }
 

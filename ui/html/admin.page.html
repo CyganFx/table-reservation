@@ -1,0 +1,26 @@
+{{template "base-layout" .}}
+{{define "title"}} Collaborate {{end}}
+{{define "content"}}
+    {{with .Flash}}
+        <div class='flash'>{{.}}</div>
+    {{end}}
+
+    <h1>Admin Panel</h1>
+
+    <a href="/api/admin/collabs">
+        <button class="btn btn-warning">Collaboration Requests</button>
+    </a><br>
+    <a href="#">
+        <button class="btn btn-info">Available Tables (TODO: here we should make reservations manually)
+        </button>
+    </a><br>
+    <a href="#">
+        <button class="btn btn-success">Busy Tables (TODO: here we should free tables if people left)
+        </button>
+    </a><br>
+    <a href="#">
+        <button class="btn btn-light">All users (TODO: here we should report users)
+        </button>
+    </a> <br>
+
+{{end}}

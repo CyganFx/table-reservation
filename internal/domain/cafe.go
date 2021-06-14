@@ -9,16 +9,21 @@ type CafeHandler interface {
 	Collaborate(c *gin.Context)
 }
 
+type AdminHandler interface {
+	AdminPage(c *gin.Context)
+}
+
 type Cafe struct {
-	ID       int
-	Name     string
-	Address  string
-	ImageURL string
-	Mobile   string
-	Email    string
-	City     City
-	Type     Type
-	Created  time.Time
+	ID          int
+	Name        string
+	Address     string
+	ImageURL    string
+	Mobile      string
+	Email       string
+	Description string
+	City        City
+	Type        Type
+	Created     time.Time
 }
 
 type Type struct {

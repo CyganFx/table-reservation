@@ -65,6 +65,9 @@
                         <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
                         <button class="btn btn-light">Logout</button>
                     </form>
+                    {{if eq .User.Role.ID 1}}
+                        <div><a href="/api/admin/" class="nav__link">Admin Panel</a></div>
+                    {{end}}
                 {{end}}
                 <div>
                     <a

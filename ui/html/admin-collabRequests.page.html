@@ -1,0 +1,28 @@
+{{template "base-layout" .}}
+{{define "title"}} Collaborate {{end}}
+{{define "content"}}
+    {{with .Flash}}
+        <div class='flash'>{{.}}</div>
+    {{end}}
+
+    <h1>Cafes that sent collab request</h1>
+
+    {{range .Cafes}}
+        <div class="flex space-x-4">
+            <div class="flex justify-center align-center w-1/5 h-auto">
+                <img src="{{.ImageURL}}"/>
+            </div>
+            <div class="flex flex-col justify-left space-y-2">
+                <div style="color: #36a448" class="font-semibold text-lg">{{.Name}}
+                    | {{.Type.Name}}</div>
+                <div class="text-sm">Description: {{.Description}}</div>
+                <div class="text-sm">Address: {{.Address}}</div>
+                <div class="text-sm">Mobile: {{.Mobile}}</div>
+                <div class="text-sm">Email: {{.Email}}</div>
+                <a href="/api/admin/approve/{{.ID}}"><button class="btn btn-primary">Approve</button></a>
+                <a href="/api/admin/disapprove/{{.ID}}"><button class="btn btn-danger">Disapprove</button></a>
+            </div>
+        </div>
+    {{end}}
+
+{{end}}

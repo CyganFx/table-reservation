@@ -73,6 +73,10 @@ values ('tasty_food', 1, 1, 'Kenesary 69', '87772292347', 'duman_ishanov@mail.ru
 
 alter table cafes add column image varchar(255) default '/static/img/plate2.png';
 
+alter table cafes add column status bool default false;
+update cafes set status = true;
+
+alter table cafes add column description text default '';
 
 create table tables
 (

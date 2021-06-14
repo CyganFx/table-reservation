@@ -42,6 +42,18 @@ func (h *handler) RequireAuthentication() gin.HandlerFunc {
 	}
 }
 
+func (h *handler) RequireAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		session := sessions.Default(c)
+		if session.Get("role") != 1 {
+			http.Redirect(c.Writer, c.Request, "/api/users/login", http.StatusSeeOther)
+			c.Abort()
+			return
+		}
+		c.Writer.Header().Add("Cache-Control", "no-store")
+	}
+}
+
 func csrfFailHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s\n", nosurf.Reason(r))
 }
