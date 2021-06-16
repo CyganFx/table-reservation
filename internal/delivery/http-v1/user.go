@@ -46,6 +46,7 @@ type UserService interface {
 	UploadImageToAWSBucket(awsSession *aws_session.Session, MyBucket, filename string, file multipart.File) error
 	DeleteImageFromAWSBucket(awsSession *aws_session.Session, imageURL, myBucket, objectsLocationURL string, infoLog *log.Logger) error
 	SetConfirmData(ctx *gin.Context, reservationData *ReservationData, tableID, eventID int, eventDescription string) (*forms.FormValidator, error)
+	UpdateUserRole(userID, roleID int) error
 }
 
 func (h *handler) ProfilePage(c *gin.Context) {

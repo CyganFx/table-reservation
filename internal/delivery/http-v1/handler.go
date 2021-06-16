@@ -26,6 +26,12 @@ var (
 	MyBucket        string
 )
 
+const (
+	adminRoleID = 1
+	userRoleID = 2
+	partnerRoleID = 3
+)
+
 type handler struct {
 	userService        UserService
 	reservationService ReservationService
@@ -106,7 +112,6 @@ func (h *handler) Init(cfg config.Config) http.Handler {
 		h.initUserRoutes(api)
 		h.initReservationRoutes(api)
 		h.initCafeRoutes(api)
-		h.initMenuRoutes(api)
 	}
 
 	router.Static("/static/", StaticFilesDir)

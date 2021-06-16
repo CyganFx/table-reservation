@@ -10,6 +10,9 @@ insert into roles (name)
 values ('admin'),
        ('user');
 
+insert into roles (name)
+values ('partner');
+
 
 create table users
 (
@@ -71,12 +74,16 @@ create table cafes
 insert into cafes(name, city_id, type_id, address, mobile, email, created)
 values ('tasty_food', 1, 1, 'Kenesary 69', '87772292347', 'duman_ishanov@mail.ru', now());
 
-alter table cafes add column image varchar(255) default '/static/img/plate2.png';
+alter table cafes
+    add column image varchar(255) default '/static/img/plate2.png';
 
-alter table cafes add column status bool default false;
-update cafes set status = true;
+alter table cafes
+    add column status bool default false;
+update cafes
+set status = true;
 
-alter table cafes add column description text default '';
+alter table cafes
+    add column description text default '';
 
 create table tables
 (

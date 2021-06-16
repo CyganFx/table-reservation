@@ -37,6 +37,7 @@ type ReservationService interface {
 type NotificatorService interface {
 	UsersBooking(data []domain.Reservation) error
 	CollaborationNotify(cafe domain.Cafe) error
+	AdminResponseToPartnership(email string, decision bool) error
 }
 
 type ReservationData struct {
