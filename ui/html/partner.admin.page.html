@@ -1,0 +1,22 @@
+{{template "base-layout" .}}
+{{define "title"}} Collaborate {{end}}
+{{define "content"}}
+    {{with .Flash}}
+        <div class='flash'>{{.}}</div>
+    {{end}}
+
+    <h1 style="text-align: center">Admin Panel</h1>
+    <a href="/api/partner/user/{{.User.ID}}">
+        <button class="btn btn-info">Manually Busy Tables (if someone came without booking we should busy table where those people sit; 1.5 hours max)
+        </button>
+    </a><br>
+    <a href="#">
+        <button class="btn btn-success">Free Tables (TODO: here we should free tables if people left)
+        </button>
+    </a><br>
+    <a href="#">
+        <button class="btn btn-light">All users (TODO: here we should report users)
+        </button>
+    </a> <br>
+
+{{end}}

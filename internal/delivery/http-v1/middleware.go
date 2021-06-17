@@ -42,10 +42,10 @@ func (h *handler) RequireAuthentication() gin.HandlerFunc {
 	}
 }
 
-func (h *handler) RequireAdmin() gin.HandlerFunc {
+func (h *handler) RequireRole(roleID int) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		session := sessions.Default(c)
-		if session.Get("role") != 1 {
+		if session.Get("role") != roleID {
 			http.Redirect(c.Writer, c.Request, "/api/users/login", http.StatusSeeOther)
 			c.Abort()
 			return

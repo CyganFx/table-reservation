@@ -7,6 +7,8 @@
         {{with .CollaborateData}}
             <form action="/api/cafe/collaborate" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+                <input type="hidden" name="adminID" value="{{ $.User.ID }}">
+
                 <div class="form-group">
                     <label>Name</label>
                     <input type="text" class="form-control" name="name" placeholder="Name">

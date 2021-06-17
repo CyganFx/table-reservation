@@ -9,17 +9,24 @@ import (
 )
 
 func (h *handler) initAdminRoutes(api *gin.RouterGroup) {
-	admin := api.Group("/admin", h.RequireAdmin())
+	admin := api.Group("/admin", h.RequireRole(adminRoleID))
 	{
 		admin.GET("/", h.AdminPage)
 		admin.GET("/collabs", h.CollabRequestsPage)
-		admin.GET("/approve/:id", h.ApproveCollabRequest)
-		admin.GET("/disapprove/:id", h.DisapproveCollabRequest)
+		admin.POST("/approve", h.ApproveCollabRequest)
+		admin.POST("/disapprove", h.DisapproveCollabRequest)
 	}
 }
 
 func (h *handler) AdminPage(c *gin.Context) {
-	h.render(c, "admin.page.html", nil)
+	// this is slow, because we need only counter of collabs, but im lazy
+	cafes, err := h.cafeService.GetCollabRequests()
+	if err != nil {
+		h.errors.ServerError(c, err)
+		return
+	}
+
+	h.render(c, "admin.page.html", &templateData{Cafes: cafes})
 }
 
 func (h *handler) CollabRequestsPage(c *gin.Context) {
@@ -33,13 +40,21 @@ func (h *handler) CollabRequestsPage(c *gin.Context) {
 }
 
 func (h *handler) ApproveCollabRequest(c *gin.Context) {
-	cafeID, err := strconv.Atoi(c.Param("id"))
-	if err != nil || cafeID < 1 {
-		h.errors.NotFound(c)
+	cafeID, _ := strconv.Atoi(c.Request.FormValue("cafeID"))
+	partnerID, _ := strconv.Atoi(c.Request.FormValue("adminID"))
+	email := c.Request.FormValue("email")
+
+	if err := h.cafeService.Approve(cafeID); err != nil {
+		h.errors.ServerError(c, err)
 		return
 	}
 
-	if err := h.cafeService.Approve(cafeID); err != nil {
+	if err := h.userService.UpdateUserRole(partnerID, partnerRoleID); err != nil {
+		h.errors.ServerError(c, err)
+		return
+	}
+
+	if err := h.notificatorService.AdminResponseToPartnership(email, true); err != nil {
 		h.errors.ServerError(c, err)
 		return
 	}
@@ -52,13 +67,15 @@ func (h *handler) ApproveCollabRequest(c *gin.Context) {
 }
 
 func (h *handler) DisapproveCollabRequest(c *gin.Context) {
-	cafeID, err := strconv.Atoi(c.Param("id"))
-	if err != nil || cafeID < 1 {
-		h.errors.NotFound(c)
+	cafeID, _ := strconv.Atoi(c.Request.FormValue("cafeID"))
+	email := c.Request.FormValue("email")
+
+	if err := h.cafeService.Disapprove(cafeID); err != nil {
+		h.errors.ServerError(c, err)
 		return
 	}
 
-	if err := h.cafeService.Disapprove(cafeID); err != nil {
+	if err := h.notificatorService.AdminResponseToPartnership(email, false); err != nil {
 		h.errors.ServerError(c, err)
 		return
 	}

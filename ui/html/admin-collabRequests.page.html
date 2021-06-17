@@ -19,8 +19,19 @@
                 <div class="text-sm">Address: {{.Address}}</div>
                 <div class="text-sm">Mobile: {{.Mobile}}</div>
                 <div class="text-sm">Email: {{.Email}}</div>
-                <a href="/api/admin/approve/{{.ID}}"><button class="btn btn-primary">Approve</button></a>
-                <a href="/api/admin/disapprove/{{.ID}}"><button class="btn btn-danger">Disapprove</button></a>
+                <form method="POST" action="/api/admin/approve">
+                    <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+                    <input type="hidden" name="cafeID" value="{{.ID}}">
+                    <input type="hidden" name="email" value="{{.Email}}">
+                    <input type="hidden" name="adminID" value="{{ .AdminID }}">
+                    <button type="submit" class="btn btn-primary">Approve</button>
+                </form>
+                <form method="POST" action="/api/admin/disapprove">
+                    <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+                    <input type="hidden" name="cafeID" value="{{.ID}}">
+                    <input type="hidden" name="email" value="{{.Email}}">
+                    <button type="submit" class="btn btn-danger">Disapprove</button>
+                </form>
             </div>
         </div>
     {{end}}

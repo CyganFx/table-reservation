@@ -22,6 +22,7 @@ var (
 func (h *handler) initUserRoutes(api *gin.RouterGroup) {
 	users := api.Group("/users")
 	{
+		users.GET("/contributors", h.ContributorsPage)
 		users.GET("/sign-up", h.SignUpPage)
 		users.POST("/sign-up", h.SignUp)
 		users.GET("/login", h.LoginPage)
@@ -46,6 +47,7 @@ type UserService interface {
 	UploadImageToAWSBucket(awsSession *aws_session.Session, MyBucket, filename string, file multipart.File) error
 	DeleteImageFromAWSBucket(awsSession *aws_session.Session, imageURL, myBucket, objectsLocationURL string, infoLog *log.Logger) error
 	SetConfirmData(ctx *gin.Context, reservationData *ReservationData, tableID, eventID int, eventDescription string) (*forms.FormValidator, error)
+	UpdateUserRole(userID, roleID int) error
 }
 
 func (h *handler) ProfilePage(c *gin.Context) {
@@ -67,7 +69,6 @@ func (h *handler) ProfilePage(c *gin.Context) {
 	}
 
 	bookings, err := h.reservationService.GetUserBookings(id)
-
 	if err != nil {
 		h.errors.ServerError(c, err)
 		return
@@ -77,6 +78,10 @@ func (h *handler) ProfilePage(c *gin.Context) {
 		User:         user,
 		Reservations: bookings,
 	})
+}
+
+func (h *handler) ContributorsPage(c *gin.Context) {
+	h.render(c, "contributors.page.html", &templateData{})
 }
 
 func (h *handler) SignUpPage(c *gin.Context) {

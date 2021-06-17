@@ -5,47 +5,6 @@
     <i class='bx bx-chevron-up scrolltop__icon'></i>
 </a>
 
-<!--========== HEADER ==========-->
-{{/*    <header class="l-header" id="header">*/}}
-{{/*        <nav class="nav bd-container">*/}}
-{{/*            <a href="/" class="nav__logo">Tasty</a>*/}}
-
-{{/*            <div class="nav__menu" id="nav-menu">*/}}
-{{/*                <ul class="nav__list">*/}}
-{{/*                    <li class="nav__item"><a href="#home" class="nav__link active-link">Home</a></li>*/}}
-{{/*                    <li class="nav__item"><a href="#about" class="nav__link">About</a></li>*/}}
-{{/*                    <li class="nav__item"><a href="/api/menu" class="nav__link">Menu</a></li>*/}}
-{{/*                    {{if .IsAuthenticated}}*/}}
-{{/*                        <li class="nav__item"><a href="/api/users/profile/{{.User.ID}}" class="nav__link">Profile</a>*/}}
-{{/*                        </li>*/}}
-{{/*                        <li class="nav__item"><a href="/api/cafe/collaborate" class="nav__link">Collaborate</a>*/}}
-{{/*                        </li>*/}}
-{{/*                        */}}{{/*                        {{if eq .User.Role.ID 1}}*/}}
-{{/*                        */}}{{/*                        {{end}}*/}}
-{{/*                    {{end}}*/}}
-{{/*                    <li class="nav__item"><a href="#services" class="nav__link">Services</a></li>*/}}
-{{/*                    <li class="nav__item"><a href="#footer" class="nav__link">Contact us</a></li>*/}}
-{{/*                    {{if .IsAuthenticated}}*/}}
-{{/*                        <li class="nav__item">*/}}
-{{/*                            <form action='/api/users/logout' method='POST'>*/}}
-{{/*                                <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">*/}}
-{{/*                                <button class="btn btn-light">Logout</button>*/}}
-{{/*                            </form>*/}}
-{{/*                        </li>*/}}
-{{/*                    {{else}}*/}}
-{{/*                        <li class="nav__item"><a href='/api/users/sign-up' class="nav__link">Signup</a></li>*/}}
-{{/*                        <li class="nav__item"><a href='/api/users/login' class="nav__link">Login</a></li>*/}}
-{{/*                    {{end}}*/}}
-{{/*                    <li><i class='bx bx-moon change-theme' id="theme-button"></i></li>*/}}
-{{/*                </ul>*/}}
-{{/*            </div>*/}}
-
-{{/*            <div class="nav__toggle" id="nav-toggle">*/}}
-{{/*                <i class='bx bx-menu'></i>*/}}
-{{/*            </div>*/}}
-{{/*        </nav>*/}}
-{{/*    </header>*/}}
-
 <!--Navbar-->
 <header class="bg-white">
     <div class="container mx-auto">
@@ -59,32 +18,38 @@
                 <div><a href="#about" class="nav__link">About Us</a></div>
                 <div><a href="/api/cafe/collaborate" class="nav__link">Join Us</a></div>
                 <div><a href="#footer" class="nav__link">Contact us</a></div>
+                <div><a href="/api/users/contributors" class="nav__link">Contributors</a></div>
                 {{if .IsAuthenticated}}
                     <div><a href="/api/users/profile/{{.User.ID}}" class="nav__link">Profile</a></div>
                     <form action='/api/users/logout' method='POST'>
                         <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
                         <button class="btn btn-light">Logout</button>
                     </form>
-                    {{if eq .User.Role.ID 1}}
-                        <div><a href="/api/admin/" class="nav__link">Admin Panel</a></div>
+
+                    {{if eq .User.Role.ID 1}}  {{/* admin */}}
+                    <div><a href="/api/admin/" class="nav__link">Admin Panel</a></div>
                     {{end}}
+                    {{if eq .User.Role.ID 3}}  {{/* partner */}}
+                    <div><a href="/api/partner/" class="nav__link">Admin Panel</a></div>
+                    {{end}}
+                {{else}}
+                    <div>
+                        <a
+                                class="p-2.5 rounded text-white nav__link"
+                                style="background-color: #36a448"
+                                href="/api/users/login"
+                        >Sign In</a
+                        >
+                    </div>
+                    <div>
+                        <a
+                                class="p-2.5 rounded text-white nav__link"
+                                style="background-color: #36a448"
+                                href='/api/users/sign-up'
+                        >Sign Up</a
+                        >
+                    </div>
                 {{end}}
-                <div>
-                    <a
-                            class="p-2.5 rounded text-white nav__link"
-                            style="background-color: #36a448"
-                            href="/api/users/login"
-                    >Sign In</a
-                    >
-                </div>
-                <div>
-                    <a
-                            class="p-2.5 rounded text-white nav__link"
-                            style="background-color: #36a448"
-                            href='/api/users/sign-up'
-                    >Sign Up</a
-                    >
-                </div>
             </div>
         </div>
     </div>

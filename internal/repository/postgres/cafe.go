@@ -195,9 +195,9 @@ func (c *cafe) FindCafesFiltered(typeID, cityID int) ([]domain.Cafe, error) {
 }
 
 func (c *cafe) Insert(cafe *domain.Cafe) error {
-	query := `INSERT INTO cafes (name, city_id, type_id, address, mobile, email, image, description, created)
-	VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`
-	err := c.db.QueryRow(context.Background(), query, cafe.Name, cafe.City.ID,
+	query := `INSERT INTO cafes (name, admin_id, city_id, type_id, address, mobile, email, image, description, created)
+	VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`
+	err := c.db.QueryRow(context.Background(), query, cafe.Name, cafe.AdminID, cafe.City.ID,
 		cafe.Type.ID, cafe.Address, cafe.Mobile, cafe.Email, cafe.ImageURL, cafe.Description, time.Now()).
 		Scan(&cafe.ID)
 	if err != nil {
@@ -257,7 +257,7 @@ func (c *cafe) SetTablesByCafeID(cafeID, locationID, numOfTables, capacity int) 
 }
 
 func (c *cafe) SearchByName(name string) ([]domain.Cafe, error) {
-	query := `SELECT c.id, c.name, c.city_id, city.name, c.description, c.type_id, type.name, c.address, c.mobile, c.email, c.created, c.image
+	query := `SELECT c.id, c.admin_id, c.name, c.city_id, city.name, c.description, c.type_id, type.name, c.address, c.mobile, c.email, c.created, c.image
 			FROM cafes as c join types as type on c.type_id = type.id join cities as city on c.city_id = city.id
 			where LOWER(c.name) like $1 and c.status = true`
 
@@ -271,7 +271,7 @@ func (c *cafe) SearchByName(name string) ([]domain.Cafe, error) {
 
 	for rows.Next() {
 		c := cafesPool.Get().(*domain.Cafe)
-		err = rows.Scan(&c.ID, &c.Name, &c.City.ID, &c.City.Name, &c.Description, &c.Type.ID, &c.Type.Name, &c.Address, &c.Mobile, &c.Email, &c.Created, &c.ImageURL)
+		err = rows.Scan(&c.ID, &c.AdminID, &c.Name, &c.City.ID, &c.City.Name, &c.Description, &c.Type.ID, &c.Type.Name, &c.Address, &c.Mobile, &c.Email, &c.Created, &c.ImageURL)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to assign values to type struct from row")
 		}
@@ -288,7 +288,7 @@ func (c *cafe) SearchByName(name string) ([]domain.Cafe, error) {
 }
 
 func (c *cafe) FindCollabRequests() ([]domain.Cafe, error) {
-	query := `SELECT c.id, c.name, c.city_id, city.name, c.description, c.type_id, type.name, c.address, c.mobile, c.email, c.created, c.image
+	query := `SELECT c.id, c.admin_id, c.name, c.city_id, city.name, c.description, c.type_id, type.name, c.address, c.mobile, c.email, c.created, c.image
 			FROM cafes as c join types as type on c.type_id = type.id join cities as city on c.city_id = city.id where c.status = false`
 
 	rows, err := c.db.Query(context.Background(), query)
@@ -301,7 +301,7 @@ func (c *cafe) FindCollabRequests() ([]domain.Cafe, error) {
 
 	for rows.Next() {
 		c := cafesPool.Get().(*domain.Cafe)
-		err = rows.Scan(&c.ID, &c.Name, &c.City.ID, &c.City.Name, &c.Description, &c.Type.ID, &c.Type.Name, &c.Address, &c.Mobile, &c.Email, &c.Created, &c.ImageURL)
+		err = rows.Scan(&c.ID, &c.AdminID, &c.Name, &c.City.ID, &c.City.Name, &c.Description, &c.Type.ID, &c.Type.Name, &c.Address, &c.Mobile, &c.Email, &c.Created, &c.ImageURL)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to assign values to type struct from row")
 		}
@@ -369,4 +369,22 @@ func (c *cafe) DeleteByID(cafeID int) error {
 	}
 
 	return nil
+}
+
+func (c *cafe) QueryCafeIDByAdminID(adminID int) (int, error) {
+	query := `SELECT id FROM cafes WHERE admin_id = $1`
+
+	var cafeID int
+
+	err := c.db.QueryRow(context.Background(), query, adminID).
+		Scan(&cafeID)
+	if err != nil {
+		if err.Error() == "no rows in result set" {
+			return -1, domain.ErrNoRecord
+		} else {
+			return -1, errors.Wrap(err, "failed to make select statement")
+		}
+	}
+
+	return cafeID, nil
 }

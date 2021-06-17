@@ -24,6 +24,7 @@ type Cafe struct {
 	City        City
 	Type        Type
 	Created     time.Time
+	AdminID     int
 }
 
 type Type struct {

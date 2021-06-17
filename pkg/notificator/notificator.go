@@ -7,6 +7,7 @@ import (
 	"github.com/CyganFx/table-reservation/internal/domain"
 	"github.com/pkg/errors"
 	gomail "gopkg.in/mail.v2"
+	"log"
 	"time"
 )
 
@@ -60,11 +61,11 @@ func (n *notificator) UsersBooking(reservations []domain.Reservation) error {
 					Thank you and look forward to seeing you again!
 					
 					With gratitude,
-					Ez-Booking application`,
+					Check, Please`,
 			data.CustName, data.Date.Format(dateLayout), data.Date.Format(timeLayoutWithoutSeconds),
 			data.Cafe.Name, data.Date.Sub(data.NotifyDate).Minutes()))
 
-		fmt.Println("Message: ", m)
+		log.Printf("Message: %v \n", m)
 		if err := d.DialAndSend(m); err != nil {
 			return errors.Wrap(err, "sending email")
 		}
@@ -84,9 +85,9 @@ func (n *notificator) CollaborationNotify(cafe domain.Cafe) error {
 	m.SetHeader("From", n.From)
 
 	// Set E-Mail receivers
-	m.SetHeader("To", "duman_ishanov@mail.ru")
+	m.SetHeader("To", "duman_ishanov@mail.ru") // need to check if i can send email to myself
 	// Set E-Mail subject
-	m.SetHeader("Subject", "Collaboration")
+	m.SetHeader("Subject", "Partnership")
 	// Set E-Mail body.
 	m.SetBody("text/plain", fmt.Sprintf(
 		`You have new request for collaboration,
@@ -96,7 +97,45 @@ func (n *notificator) CollaborationNotify(cafe domain.Cafe) error {
 					Time: %v`,
 		cafe.Name, cafe.Email, time.Now().Format(dateLayout), time.Now().Format(timeLayoutWithoutSeconds)))
 
-	fmt.Println("Message: ", m)
+	log.Printf("Message: %v \n", m)
+	if err := d.DialAndSend(m); err != nil {
+		return errors.Wrap(err, "sending email")
+	}
+
+	return nil
+}
+
+func (n *notificator) AdminResponseToPartnership(email string, decision bool) error {
+	m := gomail.NewMessage()
+	// Settings for SMTP server
+	d := gomail.NewDialer(n.Host, n.Port, n.From, n.Pass)
+	// This is only needed when SSL/TLS certificate is not valid on server.
+	// In production this should be set to false.
+	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	// Set E-Mail sender
+	m.SetHeader("From", n.From)
+
+	// Set E-Mail receivers
+	m.SetHeader("To", email)
+	// Set E-Mail subject
+	m.SetHeader("Subject", "Collaboration")
+	// Set E-Mail body.
+
+	text := "congratulations, you are our partner now!"
+	if !decision {
+		text = "sorry, we are not ready to collaborate with you yet :("
+	}
+
+	m.SetBody("text/plain", fmt.Sprintf(
+		`Hello, %s
+
+				Thank you and look forward to seeing you again!
+					
+				With gratitude,
+				Check, Please`,
+		text))
+
+	log.Printf("Message: %v \n", m)
 	if err := d.DialAndSend(m); err != nil {
 		return errors.Wrap(err, "sending email")
 	}
