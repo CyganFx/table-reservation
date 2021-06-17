@@ -27,8 +27,8 @@ var (
 )
 
 const (
-	adminRoleID = 1
-	userRoleID = 2
+	adminRoleID   = 1
+	userRoleID    = 2
 	partnerRoleID = 3
 )
 
@@ -112,6 +112,7 @@ func (h *handler) Init(cfg config.Config) http.Handler {
 		h.initUserRoutes(api)
 		h.initReservationRoutes(api)
 		h.initCafeRoutes(api)
+		h.initPartnerRoutes(api)
 	}
 
 	router.Static("/static/", StaticFilesDir)

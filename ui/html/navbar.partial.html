@@ -25,8 +25,11 @@
                         <button class="btn btn-light">Logout</button>
                     </form>
 
-                    {{if eq .User.Role.ID 1 3}}  {{/* admin and partner */}}
+                    {{if eq .User.Role.ID 1}}  {{/* admin */}}
                     <div><a href="/api/admin/" class="nav__link">Admin Panel</a></div>
+                    {{end}}
+                    {{if eq .User.Role.ID 3}}  {{/* partner */}}
+                    <div><a href="/api/partner/" class="nav__link">Admin Panel</a></div>
                     {{end}}
                 {{else}}
                     <div>

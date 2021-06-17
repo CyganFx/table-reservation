@@ -127,6 +127,34 @@ func (r *reservation) BookTable(form *forms.FormValidator, userChoice http_v1.Us
 	return reservation.ID, nil, nil
 }
 
+func (r *reservation) BookTableManually(userChoice http_v1.UserChoice, userID interface{}) (int, error) {
+	var bookDate, notifyDate time.Time
+	strBookTime := userChoice.BookTime + ":00"
+
+	err := setBookAndNotifyDate(userChoice.Date, strBookTime, &bookDate, &notifyDate)
+	if err != nil {
+		return -1, err
+	}
+
+	reservation := domain.NewReservation()
+	if userID != nil {
+		reservation.User.ID = userID.(int)
+	} else {
+		reservation.User.ID = -1
+	}
+
+	reservation.Date = bookDate
+	reservation.Cafe.ID = userChoice.CafeID
+	reservation.Table.ID = userChoice.TableID
+	reservation.Event.ID = 1 // default value
+
+	if err := r.repo.BookTable(reservation); err != nil {
+		return -1, err
+	}
+
+	return reservation.ID, nil
+}
+
 func (r *reservation) GetUserBookings(userID int) ([]domain.Reservation, error) {
 	rr, err := r.repo.GetUserReservations(userID)
 	if err != nil {

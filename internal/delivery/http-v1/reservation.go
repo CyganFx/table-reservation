@@ -28,6 +28,7 @@ type ReservationService interface {
 	GetLocationsByCafeID(cafeID int) ([]domain.Location, error)
 	GetEventsByCafeID(cafeID int) ([]domain.Event, error)
 	BookTable(form *forms.FormValidator, userChoice UserChoice, userID interface{}) (int, *forms.FormValidator, error)
+	BookTableManually(userChoice UserChoice, userID interface{}) (int, error)
 	GetUserBookings(userID int) ([]domain.Reservation, error)
 	SetDefaultReservationData(data *ReservationData, cafeID int) error
 
@@ -118,11 +119,6 @@ func (h *handler) GetAvailableTables(c *gin.Context) {
 		return
 	}
 
-	for idx, t := range reservationData.Tables {
-		tempCapacityForHTML := make([]int, t.Capacity)
-		reservationData.Tables[idx].CapacityForHTML = tempCapacityForHTML
-	}
-
 	err = h.reservationService.SetDefaultReservationData(reservationData, cafeID)
 	if err != nil {
 		h.errors.ServerError(c, err)
@@ -173,7 +169,7 @@ func (h *handler) BookTable(c *gin.Context) {
 
 	form := forms.New(c.Request.PostForm)
 
-	reservationID, formValidator, err := h.reservationService.BookTable(form, userChoice, userID)
+	_, formValidator, err := h.reservationService.BookTable(form, userChoice, userID)
 	if formValidator != nil {
 		h.render(c, "confirm.page.html", &templateData{
 			ReservationData: reservationData,
@@ -186,7 +182,6 @@ func (h *handler) BookTable(c *gin.Context) {
 	}
 
 	session.Delete("userChoice")
-	session.Set("reservationID", reservationID)
 	session.Set("flash", "Booked successfully! You will get notifications as your time comes")
 	session.Save()
 

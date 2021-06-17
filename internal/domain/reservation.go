@@ -51,10 +51,9 @@ func (r *Reservation) Reset() {
 }
 
 type Table struct {
-	ID              int
-	Capacity        int
-	CapacityForHTML []int //go can't iterate over integer, therefore creating slice
-	Location        Location
+	ID       int
+	Capacity int
+	Location Location
 }
 
 func NewTable() *Table {

@@ -67,8 +67,9 @@ func (h *handler) ProfilePage(c *gin.Context) {
 		}
 	}
 
-	bookings, err := h.reservationService.GetUserBookings(id)
+	fmt.Println("USER: ", user)
 
+	bookings, err := h.reservationService.GetUserBookings(id)
 	if err != nil {
 		h.errors.ServerError(c, err)
 		return

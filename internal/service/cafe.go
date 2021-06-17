@@ -28,6 +28,7 @@ type CafeRepo interface {
 	FindCollabRequests() ([]domain.Cafe, error)
 	ApproveByID(cafeID int) error
 	DeleteByID(cafeID int) error
+	QueryCafeIDByAdminID(adminID int) (int, error)
 }
 
 func (c *cafe) GetLocations() ([]domain.Location, error) {
@@ -85,4 +86,8 @@ func (c *cafe) Approve(cafeID int) error {
 
 func (c *cafe) Disapprove(cafeID int) error {
 	return c.repo.DeleteByID(cafeID)
+}
+
+func (c *cafe) GetCafeIDByAdminID(adminID int) (int, error) {
+	return c.repo.QueryCafeIDByAdminID(adminID)
 }

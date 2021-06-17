@@ -40,10 +40,10 @@
             background-color: brown;
         }
     </style>
-    <h1 class="mb-3 text-center">Reservation Page</h1>
+    <h1 class="mb-3 text-center">Partner Reservation Page</h1>
     <div class="d-flex justify-content-center">
     {{with .ReservationData}}
-        <form method="POST" class="w-full max-w-lg" action="/api/reservation/tables">
+        <form method="POST" class="w-full max-w-lg" action="/api/partner/reservation/tables">
 
             <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
             <input type="hidden" name="cafe_id" value="{{.CafeID}}">
@@ -141,8 +141,9 @@
         <br>
         <h1 class="mb-3 text-center"> {{len .Tables}} Available tables:</h1>
         <div class="d-flex justify-content-center">
-            <form method="POST" action="/api/reservation/confirm">
+            <form method="POST" action="/api/partner/reservation/confirm">
         <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+        <input type="hidden" name="userID" value="{{ $.User.ID }}">
 
         {{if .Tables}}
             <div class="flex flex-wrap space-x-10 px-8">
@@ -203,24 +204,13 @@
                     {{end}}
                 {{end}}
             </div>
-            <div class="form-group">
-                <label>Add event (optional)</label>
-                <select name="event_id" class="form-control">
-                    {{range .EventSelector}}
-                        <option value="{{.ID}}">{{.Name}}</option>
-                    {{end}}
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Description: </label>
-                <textarea name="event_description" class="form-control" cols="30" rows="5"></textarea>
-            </div>
+
             <div class="flex flex-wrap -mx-3 mb-3 justify-center">
                 <button class="w-4/5 md:w-full monts font-medium px-1.5 py-2.5 text-white
             max-h-8 rounded-sm text-sm flex justify-center items-center"
                         style="background-color: #36a448"
                         type="submit">
-                    Book Table
+                    Set as busy
                 </button>
             </div>
             </form>

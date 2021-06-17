@@ -42,6 +42,7 @@ type CafeService interface {
 	GetCollabRequests() ([]domain.Cafe, error)
 	Approve(cafeID int) error
 	Disapprove(cafeID int) error
+	GetCafeIDByAdminID(adminID int) (int, error)
 }
 
 type CollaborateData struct {
@@ -185,7 +186,7 @@ func (h *handler) Collaborate(c *gin.Context) {
 		h.errors.ClientError(c, http.StatusBadRequest)
 		return
 	}
-
+	adminID, _ := strconv.Atoi(c.Request.FormValue("adminID"))
 	name := c.Request.FormValue("name")
 	address := c.Request.FormValue("address")
 	mobile := c.Request.FormValue("mobile")
@@ -204,6 +205,7 @@ func (h *handler) Collaborate(c *gin.Context) {
 		ImageURL:    image,
 		City:        domain.City{},
 		Type:        domain.Type{},
+		AdminID:     adminID,
 	}
 	cafe.City.ID = cityID
 	cafe.Type.ID = typeID
@@ -226,6 +228,8 @@ func (h *handler) Collaborate(c *gin.Context) {
 	}
 
 	tableTypesCounter, _ := strconv.Atoi(c.Request.FormValue("tableTypesCounter")) //indicates how many different tables with different size and location set
+
+	fmt.Println("TableTypes Counter: ", tableTypesCounter)
 
 	for i := 0; i < tableTypesCounter; i++ {
 		locationID, _ := strconv.Atoi(c.Request.FormValue(fmt.Sprintf("location%d", i)))

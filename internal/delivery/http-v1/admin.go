@@ -41,7 +41,7 @@ func (h *handler) CollabRequestsPage(c *gin.Context) {
 
 func (h *handler) ApproveCollabRequest(c *gin.Context) {
 	cafeID, _ := strconv.Atoi(c.Request.FormValue("cafeID"))
-	userID, _ := strconv.Atoi(c.Request.FormValue("userID"))
+	partnerID, _ := strconv.Atoi(c.Request.FormValue("adminID"))
 	email := c.Request.FormValue("email")
 
 	if err := h.cafeService.Approve(cafeID); err != nil {
@@ -49,7 +49,7 @@ func (h *handler) ApproveCollabRequest(c *gin.Context) {
 		return
 	}
 
-	if err := h.userService.UpdateUserRole(userID, partnerRoleID); err != nil {
+	if err := h.userService.UpdateUserRole(partnerID, partnerRoleID); err != nil {
 		h.errors.ServerError(c, err)
 		return
 	}

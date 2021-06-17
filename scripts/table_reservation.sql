@@ -38,6 +38,8 @@ alter table users
 create index users_name_password_idx
     on users (email, password);
 
+alter table cafes
+    add column admin_id int default null;
 
 create table locations
 (

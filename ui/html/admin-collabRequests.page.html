@@ -23,7 +23,7 @@
                     <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
                     <input type="hidden" name="cafeID" value="{{.ID}}">
                     <input type="hidden" name="email" value="{{.Email}}">
-                    <input type="hidden" name="userID" value="{{ $.User.ID }}">
+                    <input type="hidden" name="adminID" value="{{ .AdminID }}">
                     <button type="submit" class="btn btn-primary">Approve</button>
                 </form>
                 <form method="POST" action="/api/admin/disapprove">
