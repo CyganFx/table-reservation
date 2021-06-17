@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/CyganFx/table-reservation/internal/domain"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/pkg/errors"
 	"time"
 )
 
@@ -117,6 +118,7 @@ func (r *reservation) BookTable(reservation *domain.Reservation) error {
 	query := `INSERT INTO reservations(cafe_id, user_id, table_id, event_id, event_description,
 				cust_name, cust_mobile, cust_email, num_of_persons, date, notify_date)
 				VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id;`
+
 	err := r.db.QueryRow(context.Background(), query, reservation.Cafe.ID, newNullInt(int32(reservation.User.ID)), reservation.Table.ID, reservation.Event.ID,
 		newNullString(reservation.EventDescription), reservation.CustName, reservation.CustMobile,
 		reservation.CustEmail, reservation.PartySize, reservation.Date, reservation.NotifyDate).
@@ -200,4 +202,54 @@ func (r *reservation) GetReservationsByNotifyDate(now time.Time) ([]domain.Reser
 	}
 
 	return rr, nil
+}
+
+func (r *reservation) GetBusyTables(cafeID, partySize, locationID int, date, minPossibleBookingTime, maxPossibleBookingTime string) ([]domain.Table, error) {
+	query := `	select id, capacity, location_id
+				from tables
+				where cafe_id = $1
+				  and capacity >= $2
+				  and location_id = $3
+				  and id in (
+					select table_id
+					from reservations
+					where to_char(date, 'YYYY-MM-DD') = $4
+					  and to_char(date, 'HH24:MI') between $5 and $6
+					);`
+	rows, err := r.db.Query(context.Background(),
+		query, cafeID, partySize, locationID, date, minPossibleBookingTime, maxPossibleBookingTime)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tt []domain.Table
+
+	for rows.Next() {
+		t := tablesPool.Get().(*domain.Table)
+		err = rows.Scan(&t.ID, &t.Capacity, &t.Location.ID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to assign values to table struct from row %v", err)
+		}
+		tt = append(tt, *t)
+
+		*t = domain.Table{}
+		tablesPool.Put(t)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return tt, nil
+}
+
+func (r *reservation) FreeTable(reservation *domain.Reservation, minBookDate, maxBookDate time.Time) error {
+	query := `DELETE FROM reservations where cafe_id = $1 and table_id = $2 and date between $3 and $4;`
+
+	_, err := r.db.Exec(context.Background(), query, reservation.Cafe.ID, reservation.Table.ID, minBookDate, maxBookDate)
+	if err != nil {
+		return errors.Wrap(err, "removing table from reservation")
+	}
+
+	return nil
 }

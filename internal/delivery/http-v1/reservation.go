@@ -33,6 +33,8 @@ type ReservationService interface {
 	SetDefaultReservationData(data *ReservationData, cafeID int) error
 
 	CheckNotifyDate(now time.Time, notificator NotificatorService) error //handler not using
+	FreeTableManually(userChoice UserChoice, userID interface{}) error
+	GetBusyTables(cafeID, partySize, locationID int, date, bookTime string) ([]domain.Table, error)
 }
 
 type NotificatorService interface {

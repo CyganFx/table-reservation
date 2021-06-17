@@ -40,10 +40,10 @@
             background-color: brown;
         }
     </style>
-    <h1 class="mb-3 text-center">Partner Reservation Page</h1>
+    <h1 class="mb-3 text-center">Partner Busy Reservation Page</h1>
     <div class="d-flex justify-content-center">
     {{with .ReservationData}}
-        <form method="POST" class="w-full max-w-lg" action="/api/partner/reservation/tables">
+        <form method="POST" class="w-full max-w-lg" action="/api/partner/reservation/available/tables">
 
             <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
             <input type="hidden" name="cafe_id" value="{{.CafeID}}">
@@ -141,7 +141,7 @@
         <br>
         <h1 class="mb-3 text-center"> {{len .Tables}} Available tables:</h1>
         <div class="d-flex justify-content-center">
-            <form method="POST" action="/api/partner/reservation/confirm">
+            <form method="POST" action="/api/partner/reservation/busy/confirm">
         <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
         <input type="hidden" name="userID" value="{{ $.User.ID }}">
 
