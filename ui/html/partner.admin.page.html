@@ -6,12 +6,12 @@
     {{end}}
 
     <h1 style="text-align: center">Admin Panel</h1>
-    <a href="/api/partner/user/{{.User.ID}}">
-        <button class="btn btn-info">Manually Busy Tables (if someone came without booking we should busy table where those people sit; 1.5 hours max)
+    <a href="/api/partner/busy/user/{{.User.ID}}">
+        <button class="btn btn-info">Manually Busy Tables
         </button>
     </a><br>
-    <a href="#">
-        <button class="btn btn-success">Free Tables (TODO: here we should free tables if people left)
+    <a href="/api/partner/free/user/{{.User.ID}}">
+        <button class="btn btn-success">Manually Free Tables
         </button>
     </a><br>
     <a href="#">

@@ -34,11 +34,13 @@ func NewReservation(repo ReservationRepo) *reservation {
 
 type ReservationRepo interface {
 	GetSuitableTables(cafeID, partySize, locationID int, date, minPossibleBookingTime, maxPossibleBookingTime string) ([]domain.Table, error)
+	GetBusyTables(cafeID, partySize, locationID int, date, minPossibleBookingTime, maxPossibleBookingTime string) ([]domain.Table, error)
 	GetAvailableLocationsByCafeID(cafeID int) ([]domain.Location, error)
 	GetAvailableEventsByCafeID(cafeID int) ([]domain.Event, error)
 	BookTable(reservation *domain.Reservation) error
 	GetUserReservations(userID int) ([]domain.Reservation, error)
 	GetReservationsByNotifyDate(now time.Time) ([]domain.Reservation, error)
+	FreeTable(reservation *domain.Reservation, minBookDate, maxBookDate time.Time) error
 }
 
 func (r *reservation) GetLocationsByCafeID(cafeID int) ([]domain.Location, error) {
@@ -62,6 +64,21 @@ func (r *reservation) GetAvailableTables(cafeID, partySize, locationID int, date
 		strconv.Itoa(tempMinPossibleBookingTime.Hour()) + ":" + strconv.Itoa(tempMinPossibleBookingTime.Minute())
 
 	return r.repo.GetSuitableTables(cafeID, partySize, locationID, date, minPossibleBookingTime, maxPossibleBookingTime)
+}
+
+func (r *reservation) GetBusyTables(cafeID, partySize, locationID int, date, bookTime string) ([]domain.Table, error) {
+	tempTime, _ := time.Parse("15:04", bookTime)
+	// postgres between operation is inclusive for greater value, therefore we need to extract to fit in range
+	tempMaxPossibleBookingTime := tempTime.Add((reservationInterval - 1) * time.Minute)
+	tempMinPossibleBookingTime := tempTime.Add(-(reservationInterval - 1) * time.Minute)
+
+	maxPossibleBookingTime :=
+		strconv.Itoa(tempMaxPossibleBookingTime.Hour()) + ":" + strconv.Itoa(tempMaxPossibleBookingTime.Minute())
+
+	minPossibleBookingTime :=
+		strconv.Itoa(tempMinPossibleBookingTime.Hour()) + ":" + strconv.Itoa(tempMinPossibleBookingTime.Minute())
+
+	return r.repo.GetBusyTables(cafeID, partySize, locationID, date, minPossibleBookingTime, maxPossibleBookingTime)
 }
 
 func setBookAndNotifyDate(strBookDate, strBookTime string, bookDate, notifyDate *time.Time) error {
@@ -153,6 +170,36 @@ func (r *reservation) BookTableManually(userChoice http_v1.UserChoice, userID in
 	}
 
 	return reservation.ID, nil
+}
+
+func (r *reservation) FreeTableManually(userChoice http_v1.UserChoice, userID interface{}) error {
+	var bookDate, notifyDate time.Time
+	strBookTime := userChoice.BookTime + ":00"
+
+	err := setBookAndNotifyDate(userChoice.Date, strBookTime, &bookDate, &notifyDate)
+	if err != nil {
+		return err
+	}
+
+	reservation := domain.NewReservation()
+	if userID != nil {
+		reservation.User.ID = userID.(int)
+	} else {
+		reservation.User.ID = -1
+	}
+
+	minBookDate := bookDate.Add(-(reservationInterval - 1) * time.Minute)
+	maxBookDate := bookDate.Add((reservationInterval - 1) * time.Minute)
+
+	reservation.Cafe.ID = userChoice.CafeID
+	reservation.Table.ID = userChoice.TableID
+	reservation.Event.ID = 1 // default value
+
+	if err := r.repo.FreeTable(reservation, minBookDate, maxBookDate); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *reservation) GetUserBookings(userID int) ([]domain.Reservation, error) {
