@@ -40,6 +40,7 @@ type UserRepo interface {
 	SetProfileImage(filePath string, userID int) error
 	UpdateUserRoleByID(userID, roleID int) error
 	Query(cafeID int) ([]domain.User, error)
+	Report(userID, cafeID int) error
 }
 
 func (u *user) Save(form *forms.FormValidator) (bool, error) {
@@ -162,4 +163,8 @@ func (u *user) GetAll(cafeID int) ([]domain.User, error) {
 
 func (u *user) UpdateUserRole(userID, roleID int) error {
 	return u.repo.UpdateUserRoleByID(userID, roleID)
+}
+
+func (u *user) AddToBlacklist(userID, cafeID int) error {
+	return u.repo.Report(userID, cafeID)
 }

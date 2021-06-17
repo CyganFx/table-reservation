@@ -22,7 +22,7 @@ func (h *handler) initPartnerRoutes(api *gin.RouterGroup) {
 		admin.POST("/reservation/free/confirm", h.PartnerFreeTableConfirm)
 
 		admin.GET("/reportPage/:id", h.ReportPage)
-		admin.POST("/report/:id", h.Report)
+		admin.POST("/report", h.Report)
 	}
 }
 
@@ -53,8 +53,29 @@ func (h *handler) ReportPage(c *gin.Context) {
 }
 
 func (h *handler) Report(c *gin.Context) {
+	if err := c.Request.ParseForm(); err != nil {
+		h.errors.ClientError(c, http.StatusBadRequest)
+		return
+	}
 
-	panic("")
+	adminID, _ := strconv.Atoi(c.Request.FormValue("adminID"))
+	userID, _ := strconv.Atoi(c.Request.FormValue("userID"))
+	cafeID, err := h.cafeService.GetCafeIDByAdminID(adminID)
+	if err != nil {
+		h.errors.ServerError(c, err)
+		return
+	}
+
+	if err := h.userService.AddToBlacklist(userID, cafeID); err != nil {
+		h.errors.ServerError(c, err)
+		return
+	}
+
+	session := sessions.Default(c)
+	session.Set("flash", "Reported successfully!")
+	session.Save()
+
+	http.Redirect(c.Writer, c.Request, fmt.Sprintf("/api/partner/reportPage/%d", adminID), http.StatusSeeOther)
 }
 
 func (h *handler) PartnerBusyReservationPage(c *gin.Context) {

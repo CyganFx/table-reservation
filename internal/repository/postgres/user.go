@@ -132,7 +132,7 @@ func (u *user) Query(cafeID int) ([]domain.User, error) {
 			role_id != 1 and role_id != 3
 			and 
 			id not in
-			(select user_id from blacklist where cafe_id != $1)`
+			(select user_id from blacklist where cafe_id = $1)`
 
 	rows, err := u.db.Query(context.Background(), query, cafeID)
 	if err != nil {
@@ -158,4 +158,15 @@ func (u *user) Query(cafeID int) ([]domain.User, error) {
 	}
 
 	return uu, nil
+}
+
+func (u *user) Report(userID, cafeID int) error {
+	query := `INSERT INTO blacklist VALUES($1, $2)`
+
+	_, err := u.db.Exec(context.Background(), query, userID, cafeID)
+	if err != nil {
+		return errors.Wrap(err, "inserting user in the blacklist")
+	}
+
+	return nil
 }
