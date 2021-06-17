@@ -54,6 +54,7 @@ type Responser interface {
 type templateData struct {
 	CSRFToken       string
 	User            *domain.User
+	Users           []domain.User
 	ReservationData *ReservationData
 	CollaborateData *CollaborateData
 	Cafes           []domain.Cafe

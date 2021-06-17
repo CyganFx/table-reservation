@@ -47,6 +47,11 @@ var (
 			return domain.NewReservation()
 		},
 	}
+	usersPool = sync.Pool{
+		New: func() interface{} {
+			return domain.NewUser()
+		},
+	}
 )
 
 func InitPool(cfg config.Config) (*pgxpool.Pool, error) {

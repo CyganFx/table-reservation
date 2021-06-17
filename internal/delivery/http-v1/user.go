@@ -43,6 +43,7 @@ type UserService interface {
 	SignIn(email, password string) (int, error)
 	FindById(id int) (*domain.User, error)
 	Update(user *domain.User) error
+	GetAll(cafeID int) ([]domain.User, error)
 	UpdateImage(filePath string, userID int) error
 	UploadImageToAWSBucket(awsSession *aws_session.Session, MyBucket, filename string, file multipart.File) error
 	DeleteImageFromAWSBucket(awsSession *aws_session.Session, imageURL, myBucket, objectsLocationURL string, infoLog *log.Logger) error

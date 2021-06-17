@@ -216,3 +216,13 @@ VALUES (1, 1),
        (1, 2),
        (1, 3),
        (1, 4);
+
+
+create table blacklist
+(
+    user_id int not null,
+    cafe_id int not null,
+    CONSTRAINT blacklist_fk_user_id foreign key (user_id) references users (id),
+    CONSTRAINT blacklist_fk_cafe_id foreign key (cafe_id) references cafes (id),
+    CONSTRAINT blacklist_ck unique (user_id, cafe_id)
+);

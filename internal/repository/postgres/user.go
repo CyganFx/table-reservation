@@ -2,11 +2,11 @@ package postgres
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/CyganFx/table-reservation/internal/domain"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
 	"time"
@@ -125,4 +125,37 @@ func (u *user) UpdateUserRoleByID(userID, roleID int) error {
 	}
 
 	return nil
+}
+
+func (u *user) Query(cafeID int) ([]domain.User, error) {
+	query := `SELECT id, name, email, mobile FROM users where 
+			role_id != 1 and role_id != 3
+			and 
+			id not in
+			(select user_id from blacklist where cafe_id != $1)`
+
+	rows, err := u.db.Query(context.Background(), query, cafeID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var uu []domain.User
+
+	for rows.Next() {
+		u := usersPool.Get().(*domain.User)
+		err = rows.Scan(&u.ID, &u.Name, &u.Email, &u.Mobile)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to assign values to location struct from row")
+		}
+		uu = append(uu, *u)
+
+		*u = domain.User{}
+		usersPool.Put(u)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return uu, nil
 }

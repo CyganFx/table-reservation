@@ -1,0 +1,20 @@
+{{template "base-layout" .}}
+{{define "title"}} Collaborate {{end}}
+{{define "content"}}
+    {{with .Flash}}
+        <div class='flash'>{{.}}</div>
+    {{end}}
+
+    <h1 style="text-align: center">Report Page</h1>
+    <h2>Users: </h2>
+    <ul class="list-group">
+        {{range .Users}}
+            <form action="/api/partner/report/{{$.User.ID}}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+                <input type="hidden" name="userID" value="{{.ID}}">
+                <li class="list-group-item">ID: {{.ID}} Name: {{.Name}} Email: {{.Email}} Mobile: {{.Mobile}}</li>
+                <button type="submit" class="btn btn-danger">Report</button>
+            </form>
+        {{end}}
+    </ul>
+{{end}}

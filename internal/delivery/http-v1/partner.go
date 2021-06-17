@@ -20,11 +20,41 @@ func (h *handler) initPartnerRoutes(api *gin.RouterGroup) {
 		admin.GET("/free/user/:id", h.PartnerFreeReservationPage)
 		admin.POST("/reservation/reserved/tables", h.GetReservedTablesForPartner)
 		admin.POST("/reservation/free/confirm", h.PartnerFreeTableConfirm)
+
+		admin.GET("/reportPage/:id", h.ReportPage)
+		admin.POST("/report/:id", h.Report)
 	}
 }
 
 func (h *handler) PartnerPage(c *gin.Context) {
 	h.render(c, "partner.admin.page.html", &templateData{})
+}
+
+func (h *handler) ReportPage(c *gin.Context) {
+	adminID, err := strconv.Atoi(c.Param("id"))
+	if err != nil || adminID < 1 {
+		h.errors.NotFound(c)
+		return
+	}
+
+	cafeID, err := h.cafeService.GetCafeIDByAdminID(adminID)
+	if err != nil {
+		h.errors.ServerError(c, err)
+		return
+	}
+
+	users, err := h.userService.GetAll(cafeID)
+	if err != nil {
+		h.errors.ServerError(c, err)
+		return
+	}
+
+	h.render(c, "partner.report.page.html", &templateData{Users: users})
+}
+
+func (h *handler) Report(c *gin.Context) {
+
+	panic("")
 }
 
 func (h *handler) PartnerBusyReservationPage(c *gin.Context) {

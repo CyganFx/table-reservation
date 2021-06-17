@@ -39,6 +39,7 @@ type UserRepo interface {
 	Authenticate(email, password string) (int, error)
 	SetProfileImage(filePath string, userID int) error
 	UpdateUserRoleByID(userID, roleID int) error
+	Query(cafeID int) ([]domain.User, error)
 }
 
 func (u *user) Save(form *forms.FormValidator) (bool, error) {
@@ -153,6 +154,10 @@ func (u *user) DeleteImageFromAWSBucket(awsSession *aws_session.Session, imageUR
 
 	infoLog.Printf("Object deleted from aws s3 bucket: %v", result)
 	return nil
+}
+
+func (u *user) GetAll(cafeID int) ([]domain.User, error) {
+	return u.repo.Query(cafeID)
 }
 
 func (u *user) UpdateUserRole(userID, roleID int) error {
