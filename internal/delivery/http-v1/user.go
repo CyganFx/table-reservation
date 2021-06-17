@@ -22,6 +22,7 @@ var (
 func (h *handler) initUserRoutes(api *gin.RouterGroup) {
 	users := api.Group("/users")
 	{
+		users.GET("/contributors", h.ContributorsPage)
 		users.GET("/sign-up", h.SignUpPage)
 		users.POST("/sign-up", h.SignUp)
 		users.GET("/login", h.LoginPage)
@@ -67,8 +68,6 @@ func (h *handler) ProfilePage(c *gin.Context) {
 		}
 	}
 
-	fmt.Println("USER: ", user)
-
 	bookings, err := h.reservationService.GetUserBookings(id)
 	if err != nil {
 		h.errors.ServerError(c, err)
@@ -79,6 +78,10 @@ func (h *handler) ProfilePage(c *gin.Context) {
 		User:         user,
 		Reservations: bookings,
 	})
+}
+
+func (h *handler) ContributorsPage(c *gin.Context) {
+	h.render(c, "contributors.page.html", &templateData{})
 }
 
 func (h *handler) SignUpPage(c *gin.Context) {

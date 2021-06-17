@@ -229,8 +229,6 @@ func (h *handler) Collaborate(c *gin.Context) {
 
 	tableTypesCounter, _ := strconv.Atoi(c.Request.FormValue("tableTypesCounter")) //indicates how many different tables with different size and location set
 
-	fmt.Println("TableTypes Counter: ", tableTypesCounter)
-
 	for i := 0; i < tableTypesCounter; i++ {
 		locationID, _ := strconv.Atoi(c.Request.FormValue(fmt.Sprintf("location%d", i)))
 		numOfTables, _ := strconv.Atoi(c.Request.FormValue(fmt.Sprintf("number%d", i)))

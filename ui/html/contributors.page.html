@@ -1,0 +1,32 @@
+{{template "base-layout" .}}
+{{define "title"}} Check, Please {{end}}
+{{define "content"}}
+    {{with .Flash}}
+        <div class='flash'>{{.}}</div>
+    {{end}}
+    <h1 style="text-align: center">Contributors</h1>
+    <div class="w3-content w3-padding" style="max-width:1564px; margin: 70px">
+        <div class="w3-row-padding w3-grayscale">
+            <div class="w3-col l3 m6 w3-margin-bottom" style="max-height: 400px; max-width: 300px">
+                <img src="https://sun1.dataix-kz-akkol.userapi.com/s/v1/ig2/0PLOwFdWBmBVKdBoZH-Rr17FkakHTo23SPvbiRNiM6I1TNXsHXReFZWNO_B-3HbLe7-uwgVpr7bHUoiTsi1EXw9y.jpg?size=200x0&quality=95&crop=88,56,822,1028&ava=1"
+                     alt="Mike" style="width:100%; height:300px">
+                <h3>Duman Ishanov</h3>
+                <p class="w3-opacity">Backend / Frontend / Architecture / DB</p>
+                <p>Astana IT University</p>
+                <p><a href="https://github.com/CyganFx" target="_blank">
+                        <button class="w3-button w3-light-grey w3-block">Github</button>
+                    </a></p>
+            </div>
+            <div class="w3-col l3 m6 w3-margin-bottom" style="max-height: 400px; max-width: 300px">
+                <img src="https://sun9-20.userapi.com/impf/c849528/v849528609/6eaeb/jkPZBkpoMOY.jpg?size=453x604&quality=96&sign=1e1c307d5d2c22e8bb0dd8cfe66b0128&c_uniq_tag=wnGG-HtrxuyfqB1o53cb2TLU71IiMlUfEALo8Sjq_P8&type=album"
+                     alt="Dan" style="width:100%; height:300px">
+                <h3>Alemkhan Yergaliev</h3>
+                <p class="w3-opacity">Frontend</p>
+                <p>Astana IT University</p>
+                <p><a href="https://github.com/CyganFx" target="_blank">
+                        <button class="w3-button w3-light-grey w3-block">Github</button>
+                    </a></p>
+            </div>
+        </div>
+    </div>
+{{end}}

@@ -138,8 +138,6 @@ func (r *reservation) GetUserReservations(userID int) ([]domain.Reservation, err
 			left join events e on r.event_id = e.id
 			WHERE r.user_id = $1;`
 
-	fmt.Println("User ID:", userID)
-
 	rows, err := r.db.Query(context.Background(), query, userID)
 	if err != nil {
 		return nil, err
