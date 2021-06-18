@@ -157,7 +157,6 @@ div.flash {
     font-weight: bold;
     background-color: var(--first-color-alt);
     padding: 18px;
-    margin-top: 72px;
     text-align: center;
     z-index: 999;
 }
