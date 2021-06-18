@@ -50,6 +50,7 @@ type UserService interface {
 	SetConfirmData(ctx *gin.Context, reservationData *ReservationData, tableID, eventID int, eventDescription string) (*forms.FormValidator, error)
 	UpdateUserRole(userID, roleID int) error
 	AddToBlacklist(userID, cafeID int) error
+	InBlacklist(userID, cafeID int) (bool, error)
 }
 
 func (h *handler) ProfilePage(c *gin.Context) {

@@ -166,6 +166,18 @@ func (h *handler) BookTable(c *gin.Context) {
 	userChoice := session.Get("userChoice").(UserChoice)
 	userID := session.Get("authenticatedUserID")
 
+	if userID != nil {
+		yes, err := h.userService.InBlacklist(userID.(int), userChoice.CafeID)
+		if err != nil {
+			h.errors.ServerError(c, err)
+			return
+		}
+		if yes {
+			h.errors.ClientError(c, http.StatusForbidden)
+			return
+		}
+	}
+
 	reservationData := &ReservationData{}
 	reservationData.UserChoice = userChoice
 

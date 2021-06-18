@@ -41,6 +41,7 @@ type UserRepo interface {
 	UpdateUserRoleByID(userID, roleID int) error
 	Query(cafeID int) ([]domain.User, error)
 	Report(userID, cafeID int) error
+	CheckBlackList(userID, cafeID int) (int, error)
 }
 
 func (u *user) Save(form *forms.FormValidator) (bool, error) {
@@ -167,4 +168,17 @@ func (u *user) UpdateUserRole(userID, roleID int) error {
 
 func (u *user) AddToBlacklist(userID, cafeID int) error {
 	return u.repo.Report(userID, cafeID)
+}
+
+func (u *user) InBlacklist(userID, cafeID int) (bool, error) {
+	counter, err := u.repo.CheckBlackList(userID, cafeID)
+	if err != nil {
+		return false, err
+	}
+
+	if counter == 0 {
+		return false, nil
+	}
+
+	return true, nil
 }

@@ -170,3 +170,17 @@ func (u *user) Report(userID, cafeID int) error {
 
 	return nil
 }
+
+func (u *user) CheckBlackList(userID, cafeID int) (int, error) {
+	query := `SELECT COUNT(*) from blacklist WHERE user_id = $1 and cafe_id = $2`
+
+	var counter int
+
+	err := u.db.QueryRow(context.Background(), query, userID, cafeID).
+		Scan(&counter)
+	if err != nil {
+		return 0, errors.Wrap(err, "counting users in black list")
+	}
+
+	return counter, nil
+}
