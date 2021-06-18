@@ -85,7 +85,7 @@ func (n *notificator) CollaborationNotify(cafe domain.Cafe) error {
 	m.SetHeader("From", n.From)
 
 	// Set E-Mail receivers
-	m.SetHeader("To", "duman_ishanov@mail.ru") // need to check if i can send email to myself
+	m.SetHeader("To", n.From) // need to check if i can send email to myself
 	// Set E-Mail subject
 	m.SetHeader("Subject", "Partnership")
 	// Set E-Mail body.

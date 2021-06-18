@@ -5,39 +5,35 @@
         <div class='flash'>{{.}}</div>
     {{end}}
 
-    <div class="flex flex-col items-center">
-        <h1 class="mb-3">Cafes that sent collab request</h1>
-        <div class="flex flex-row flex-wrap px-3 mb-24">
-            {{range .Cafes}}
-                <div class="flex space-x-4 w-1/3 justify-center">
-                    <div class="flex justify-center align-center w-1/5 h-auto">
-                        <img src="{{.ImageURL}}"/>
-                    </div>
-                    <div class="flex flex-col justify-left space-y-2">
-                        <div style="color: #36a448" class="font-semibold text-lg">{{.Name}}
-                            | {{.Type.Name}}</div>
-                        <div class="text-sm">Description: {{.Description}}</div>
-                        <div class="text-sm">Address: {{.Address}}</div>
-                        <div class="text-sm">Mobile: {{.Mobile}}</div>
-                        <div class="text-sm">Email: {{.Email}}</div>
-                        <form method="POST" action="/api/admin/approve">
-                            <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
-                            <input type="hidden" name="cafeID" value="{{.ID}}">
-                            <input type="hidden" name="email" value="{{.Email}}">
-                            <input type="hidden" name="adminID" value="{{ .AdminID }}">
-                            <button type="submit" class="btn btn-primary">Approve</button>
-                        </form>
-                        <form method="POST" action="/api/admin/disapprove">
-                            <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
-                            <input type="hidden" name="cafeID" value="{{.ID}}">
-                            <input type="hidden" name="email" value="{{.Email}}">
-                            <button type="submit" class="btn btn-danger">Disapprove</button>
-                        </form>
-                    </div>
-                </div>
-            {{end}}
-        </div>
-    </div>
+    <h1 class="mb-3" style="text-align: center">Cafes that sent collab request</h1>
 
+    {{range .Cafes}}
+        <div style="margin-top: 50px; margin-bottom: 50px">
+            <div class="flex space-x-4 w-1/3 justify-center">
+                <img src="{{.ImageURL}}" style="max-width:350px"/>
+                <div class="flex flex-col justify-left space-y-2">
+                    <div style="color: #36a448" class="font-semibold text-lg">{{.Name}}
+                        | {{.Type.Name}}</div>
+                    <div class="text-sm">Description: {{.Description}}</div>
+                    <div class="text-sm">Address: {{.Address}}</div>
+                    <div class="text-sm">Mobile: {{.Mobile}}</div>
+                    <div class="text-sm">Email: {{.Email}}</div>
+                    <form method="POST" action="/api/admin/approve">
+                        <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+                        <input type="hidden" name="cafeID" value="{{.ID}}">
+                        <input type="hidden" name="email" value="{{.Email}}">
+                        <input type="hidden" name="adminID" value="{{ .AdminID }}">
+                        <button type="submit" class="btn btn-primary">Approve</button>
+                    </form>
+                    <form method="POST" action="/api/admin/disapprove">
+                        <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+                        <input type="hidden" name="cafeID" value="{{.ID}}">
+                        <input type="hidden" name="email" value="{{.Email}}">
+                        <button type="submit" class="btn btn-danger">Disapprove</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {{end}}
 
 {{end}}

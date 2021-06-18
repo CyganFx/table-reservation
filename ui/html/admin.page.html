@@ -6,9 +6,11 @@
     {{end}}
 
     <h1 style="text-align: center">Admin Panel</h1>
-
-    <a href="/api/admin/collabs">
-        <button class="btn btn-warning">Collaboration Requests ({{len .Cafes}})</button>
-    </a><br>
+    <div style="margin-top: 50px; text-align: center; justify-content: center">
+        <a href="/api/admin/collabs">
+            <button class="btn btn-warning">Collaboration Requests ({{len .Cafes}})</button>
+        </a>
+    </div>
+    <div style="margin-bottom: 350px"></div>
 
 {{end}}
