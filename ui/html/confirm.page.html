@@ -1,37 +1,61 @@
 {{template "base-layout" .}}
 {{define "title"}} Confirmation {{end}}
 {{define "content"}}
-    <br><br><br>
-    {{with .ReservationData.UserChoice}}
-        <h2>You are booking table {{.TableID}} at {{.Date}} {{.BookTime}} for {{.PartySize}} people</h2>
-    {{end}}
-    <form method="POST" action="/api/reservation/submit">
-        <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
-        {{with .Form}}
-            <div>
-                <label>Name: </label>
-                {{with .Errors.Get "name"}}
-                    <label class="error">{{.}}</label>
-                {{end}}
-                <input type="text" name="name" value='{{.Get "name"}}'>
+    <div style="height: 50vh" class="flex justify-center items-center">
+        <div class="w-2/5  monts">
+            <div class="flex flex-col border border-transparent rounded-xl">
+                <div style="background-color: #36a448" class="flex justify-left items-center
+                text-white text-2xl
+                h-12 py-1 px-1.5">
+                    Please, confirm your book!
+                </div>
+                <div>
+                    <form class="flex flex-col p-4" method="POST" action="/api/reservation/submit">
+                        <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
+                        {{with .ReservationData.UserChoice}}
+                            <div class="text-xl font-semibold">
+                                <label>Table # {{.TableID}}</label>
+                                <label>On {{.Date}} At {{.BookTime}}</label>
+                            </div>
+                        {{end}}
+                        {{with .Form}}
+                            <div>
+                                <label>Name: </label>
+                                {{with .Errors.Get "name"}}
+                                    <label class="error">{{.}}</label>
+                                {{end}}
+                                <input type="text" name="name" value='{{.Get "name"}}'>
+                            </div>
+                            <div>
+                                <label>Phone Number: </label>
+                                {{with .Errors.Get "mobile"}}
+                                    <label class="error">{{.}}</label>
+                                {{end}}
+                                <input type="text" name="mobile" value='{{.Get "mobile"}}'>
+                            </div>
+                            <div class="flex flex-row justify-between items-center">
+                                <div>
+                                    <label>Email: </label>
+                                    {{with .Errors.Get "email"}}
+                                        <label class="error">{{.}}</label>
+                                    {{end}}
+                                    <input type="email" name="email" value='{{.Get "email"}}'>
+                                </div>
+                                <div>
+                                    <button type="submit" class="btn btn-success">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        {{end}}
+                    </form>
+                </div>
             </div>
-            <div>
-                <label>Phone Number: </label>
-                {{with .Errors.Get "mobile"}}
-                    <label class="error">{{.}}</label>
-                {{end}}
-                <input type="text" name="mobile" value='{{.Get "mobile"}}'>
-            </div>
-            <div>
-                <label>Email: </label>
-                {{with .Errors.Get "email"}}
-                    <label class="error">{{.}}</label>
-                {{end}}
-                <input type="email" name="email" value='{{.Get "email"}}'>
-            </div>
-            <button type="submit" class="btn btn-success">Book Now</button>
-        {{end}}
-    </form>
+        </div>
+    </div>
+
     <br><br><br>
 {{end}}
 

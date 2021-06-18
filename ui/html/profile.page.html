@@ -1,10 +1,8 @@
 {{template "base-layout" .}}
 {{define "title"}} Profile {{end}}
 {{define "content"}}
-    <br><br><br>
-
     {{with .User}}
-        <section class="profile-card">
+        <section class="profile-card p-5 monts">
         <h1 style="text-align: center; position: relative">Profile</h1>
         <div class="image-container">
             <figure class="avatar"><img src="{{.ImageURL}}" alt="profile-image" height="150px" width="150px">
