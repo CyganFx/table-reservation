@@ -1,85 +1,145 @@
 {{template "base-layout" .}}
 {{define "title"}} Collaborate {{end}}
 {{define "content"}}
-    <br><br><br>
-    <h1 class="mb-3 text-center">Become part of us</h1>
-    <div class="d-flex justify-content-center">
+    <style>
+        .search-field__background {
+            background-image: url(/static/img/handshake.jpg);
+            background-position: 100%;
+            background-repeat: no-repeat;
+            background-size: cover;
+            height: 26rem;
+            opacity: 1;
+        }
+        .book_button {
+            color: #36a448;
+            outline: none;
+            border-color: #36a448;
+            text-decoration: none;
+        }
+
+        .book_button:hover {
+            background-color: #36a448;
+            border-color: white;
+            color: white;
+        }
+    </style>
+    <div
+            class="
+        flex flex-col
+        space-y-3
+        justify-center
+        items-center
+        bg-contain bg-no-repeat
+        search-field__background
+      "
+    >
+        <div class="text-4xl text-white font-medium monts">
+            Become part of us
+        </div>
+        <div class="text-xl text-white font-medium monts text-center">
+            Fill the fields below properly and clearly to be our partner! <br> We hope we will work together!
+        </div>
+    </div>
+    <div class="d-flex justify-content-center p-8">
         {{with .CollaborateData}}
             <form action="/api/cafe/collaborate" method="POST">
                 <input type="hidden" name="csrf_token" value="{{ $.CSRFToken }}">
                 <input type="hidden" name="adminID" value="{{ $.User.ID }}">
-
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" class="form-control" name="name" placeholder="Name">
-                </div>
-                <div class="form-group">
-                    <label>City</label>
-                    <select class="form-control" name="city">
-                        {{range .Cities}}
-                            <option value="{{.ID}}">{{.Name}}</option>
-                        {{end}}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Type</label>
-                    <select class="form-control" name="type">
-                        {{range .Types}}
-                            <option value="{{.ID}}">{{.Name}}</option>
-                        {{end}}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea class="form-control" name="description" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Locations</label>
-                    {{range .Locations}}
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="{{.ID}}" name="locations">
-                            <label class="form-check-label">{{.Name}}</label>
+                <div class="flex flex-row flex-wrap space-x-16">
+                    <div style="width: 36rem" class="flex flex-col flex-wrap justify-center -mx-3 mb-3">
+                        <div class="w-full px-3 mb-1.5">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Name</label>
+                            <input type="text" class="appearance-none block w-full bg-gray-200
+                    text-gray-700 border border-red-500 rounded py-3 px-4 mb-3
+                    leading-tight focus:outline-none focus:bg-white" name="name" placeholder="Name">
                         </div>
-                    {{end}}
-                </div>
-                <div class="form-group">
-                    <label>Events</label>
-                    {{range .Events}}
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="{{.ID}}" name="events">
-                            <label class="form-check-label">{{.Name}}</label>
+                        <div class="w-full px-3 mb-1.5">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Type</label>
+                            <select class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700
+                            py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" name="type">
+                                {{range .Types}}
+                                    <option value="{{.ID}}">{{.Name}}</option>
+                                {{end}}
+                            </select>
                         </div>
-                    {{end}}
-                </div>
+                        <div class="w-full px-3 mb-1.5">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">City</label>
+                            <select class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700
+                            py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" name="city">
+                                {{range .Cities}}
+                                    <option value="{{.ID}}">{{.Name}}</option>
+                                {{end}}
+                            </select>
+                        </div>
+                        <div class="w-full px-3 mb-1.5">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Description</label>
+                            <textarea class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700
+                            py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="w-full px-3 mb-1.5">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Locations</label>
+                            {{range .Locations}}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="{{.ID}}" name="locations">
+                                    <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">{{.Name}}</label>
+                                </div>
+                            {{end}}
+                        </div>
+                        <div class="w-full px-3 mb-1.5">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Events</label>
+                            {{range .Events}}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="{{.ID}}" name="events">
+                                    <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">{{.Name}}</label>
+                                </div>
+                            {{end}}
+                        </div>
 
-                <input type="hidden" id="tableTypesCounter" name="tableTypesCounter">
+                        <input type="hidden" id="tableTypesCounter" name="tableTypesCounter">
 
-                <div id="tablesDiv">
-                </div>
+                        <div class="w-full px-3 mb-1.5" id="tablesDiv">
+                        </div>
 
-                <button type="button" class="btn btn-info" onclick="AddTablesField()">Add Tables</button>
+                        <div class="w-full px-3 mb-1.5">
+                            <button type="button" class="book_button w-full py-2.5 text-center border-2 text-xs rounded-sm" onclick="AddTablesField()">Add Tables</button>
+                        </div>
+                    </div>
+                    <div style="width: 36rem" class="flex flex-col justify-center -mx-3 mb-3">
+                        <div class="w-full px-3 mb-1.5">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Phone number</label>
+                            <input type="text" class="appearance-none block w-full bg-gray-200
+                    text-gray-700 border border-red-500 rounded py-3 px-4 mb-3
+                    leading-tight focus:outline-none focus:bg-white" name="mobile" placeholder="+77772292347 / 87772292347">
+                        </div>
+                        <div class="w-full px-3 mb-1.5">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Image</label>
+                            <input type="text" class="appearance-none block w-full bg-gray-200
+                    text-gray-700 border border-red-500 rounded py-3 px-4 mb-3
+                    leading-tight focus:outline-none focus:bg-white" name="image" placeholder="URL">
+                        </div>
+                        <div class="w-full px-3 mb-1.5">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Address</label>
+                            <input type="text" class="appearance-none block w-full bg-gray-200
+                    text-gray-700 border border-red-500 rounded py-3 px-4 mb-3
+                    leading-tight focus:outline-none focus:bg-white" name="address" placeholder="Qabanbay batyra 9/2">
+                        </div>
+                        <div class="w-full px-3 mb-3.5">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Email</label>
+                            <input type="email" class="appearance-none block w-full bg-gray-200
+                    text-gray-700 border border-red-500 rounded py-3 px-4 mb-3
+                    leading-tight focus:outline-none focus:bg-white" name="email" aria-describedby="emailHelp"
+                                   placeholder="Enter email">
+                            <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone
+                                else.</small>
+                        </div>
+                        <div class="w-full px-3 mb-1.5">
+                            <button type="submit" class="book_button w-full py-2.5 text-center border-2 text-xs rounded-sm">
+                                Submit
+                            </button>
+                        </div>
+                    </div>
 
-                <div class="form-group">
-                    <label>Phone number</label>
-                    <input type="text" class="form-control" name="mobile" placeholder="+77772292347 / 87772292347">
                 </div>
-                <div class="form-group">
-                    <label>Image</label>
-                    <input type="text" class="form-control" name="image" placeholder="URL">
-                </div>
-                <div class="form-group">
-                    <label>Address</label>
-                    <input type="text" class="form-control" name="address" placeholder="Qabanbay batyra 9/2">
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" class="form-control" name="email" aria-describedby="emailHelp"
-                           placeholder="Enter email">
-                    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone
-                        else.</small>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Submit</button>
             </form>
         {{end}}
     </div>

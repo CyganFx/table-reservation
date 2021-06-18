@@ -11,9 +11,10 @@ function AddTablesField() {
     let div = document.createElement('div');
     div.className = 'form-inline';
     div.innerHTML = `
-            <div class="form-group mb-2">
-                <label>Locations</label>
-                <select class="form-control" name="location${tableTypesCounter}">                               
+            <div>
+                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Locations</label>
+                <select class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700
+                            py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" name="location${tableTypesCounter}">                               
                       <option value="1">Default</option>                              
                       <option value="2">Sofa</option>                              
                       <option value="3">Outside</option>                              
@@ -21,12 +22,12 @@ function AddTablesField() {
                       <option value="5">Window</option>                              
                  </select>     
             </div>      
-            <div class="form-group mb-2">
-                <label>Number of Tables</label>
+            <div>
+                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Number of Tables</label>
                 <input class="form-control" type="number" name="number${tableTypesCounter}">
             </div>
-            <div class="form-group mb-2">
-                <label>Capacity of Tables</label>
+            <div>
+                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Capacity of Tables</label>
                 <input class="form-control" type="number" name="capacity${tableTypesCounter}">
             </div>
             
